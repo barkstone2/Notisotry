@@ -1,11 +1,11 @@
 package html.parser;
 
-import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Node;
 
 import java.util.Map;
 
 public interface HtmlParser {
 
-    Element parse(Map<String, Object> block);
+    Node parse(Map<String, Object> block);
 
 }
