@@ -16,16 +16,21 @@ class ParagraphHtmlParser : HtmlParser {
         var p = Element("p")
 
         for (richText in richTexts) {
-            var plainText = richText["plain_text"] as String
-            val textNodes = linebreakPlaintext(plainText)
-
-            var innerTag = createInnerTag(richText)
-            innerTag?.appendChildren(textNodes)
-
-            p.appendChildren(innerTag?.let { mutableListOf(it) } ?: textNodes)
+            val textNodes = createTextNodes(richText)
+            p.appendChildren(textNodes)
         }
 
         return p
+    }
+
+    fun createTextNodes(textBlock: HashMap<String, Any>): MutableList<Node> {
+        var plainText = textBlock["plain_text"] as String
+        val textNodes = linebreakPlaintext(plainText)
+
+        var innerTag = createInnerTag(textBlock)
+        innerTag?.appendChildren(textNodes)
+
+        return innerTag?.let { mutableListOf(it) } ?: textNodes
     }
 
     private fun linebreakPlaintext(plainText: String): MutableList<Node> {
