@@ -6,10 +6,10 @@ import org.jsoup.nodes.TextNode
 
 class ParagraphHtmlParser : HtmlParser {
 
-    override fun parse(block: MutableMap<String, Any>): Element {
+    override fun parse(block: Map<String, Any>): Element {
 
-        val paragraph = block["paragraph"] as HashMap<String, Any>
-        val richTexts = paragraph["rich_text"] as List<HashMap<String, Any>>
+        val paragraph = block["paragraph"] as Map<String, Any>
+        val richTexts = paragraph["rich_text"] as List<Map<String, Any>>
 
         if(richTexts.isEmpty()) return Element("br")
 
@@ -81,8 +81,8 @@ class ParagraphHtmlParser : HtmlParser {
     } else null
 
 
-    private fun isAnnotatedElement(richText : HashMap<String, Any>) : Pair<Boolean, List<Pair<String, Any>>> {
-        val annotations : HashMap<String, Any> = richText["annotations"] as HashMap<String, Any>
+    private fun isAnnotatedElement(richText : Map<String, Any>) : Pair<Boolean, List<Pair<String, Any>>> {
+        val annotations = richText["annotations"] as Map<String, Any>
 
         val annotatedAttributeList = mutableListOf<Pair<String, Any>>()
         for (key in annotations.keys) {
