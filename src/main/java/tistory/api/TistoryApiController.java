@@ -3,14 +3,15 @@ package tistory.api;
 import com.fasterxml.jackson.core.type.TypeReference;
 import common.Util;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.chrome.ChromeDriver;
 import tistory.TistoryCategory;
 
 import javax.net.ssl.HttpsURLConnection;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
+import java.io.*;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.*;
 
