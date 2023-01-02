@@ -2,6 +2,7 @@ package notion.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -14,9 +15,9 @@ public class NotionPage {
     private String releaseState;
     @JsonFormat
     private LocalDateTime releaseDate;
-    private boolean allowComment;
+    private boolean allowComment = true;
     private String content;
-    private boolean done;
+    private boolean done = false;
 
     public NotionPage(String title, List<String> tag, String pageId, String category, String releaseState, LocalDateTime releaseDate, boolean allowComment) {
         this.title = title;
@@ -51,8 +52,9 @@ public class NotionPage {
         this.title = title;
     }
 
-    public List<String> getTag() {
-        return tag;
+    public String getTag() {
+        if(tag == null || tag.isEmpty()) return "";
+        return String.join(",", tag);
     }
 
     public void setTag(List<String> tag) {
@@ -68,7 +70,7 @@ public class NotionPage {
     }
 
     public String getCategory() {
-        return category;
+        return category == null ? "" : category;
     }
 
     public void setCategory(String category) {
@@ -76,23 +78,23 @@ public class NotionPage {
     }
 
     public String getReleaseState() {
-        return releaseState;
+        return releaseState.equals("비공개") ? "0" : "3";
     }
 
     public void setReleaseState(String releaseState) {
         this.releaseState = releaseState;
     }
 
-    public LocalDateTime getReleaseDate() {
-        return releaseDate;
+    public String getReleaseDate() {
+        return String.valueOf(Timestamp.valueOf(releaseDate).getTime());
     }
 
     public void setReleaseDate(LocalDateTime releaseDate) {
         this.releaseDate = releaseDate;
     }
 
-    public boolean isAllowComment() {
-        return allowComment;
+    public String isAllowComment() {
+        return allowComment ? "1" : "0";
     }
 
     public void setAllowComment(boolean allowComment) {
@@ -111,8 +113,8 @@ public class NotionPage {
         return done;
     }
 
-    public void setDone(boolean done) {
-        this.done = done;
+    public void uploadSuccess() {
+        this.done = true;
     }
 
 }
