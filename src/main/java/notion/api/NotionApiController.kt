@@ -7,6 +7,7 @@ import common.Util
 import html.parser.*
 import notion.NotionBlockType
 import notion.dto.NotionPage
+import org.asynchttpclient.DefaultAsyncHttpClient
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import org.slf4j.LoggerFactory
@@ -24,6 +25,8 @@ private const val DATABASE_URL_SUFFIX = "query"
 
 private const val BLOCK_URL_PREFIX = "blocks"
 private const val BLOCK_URL_SUFFIX = "children"
+
+private const val PAGE_URL_PREFIX = "pages"
 
 private const val NOTION_VERSION_HEADER_KEY = "Notion-Version"
 private const val NOTION_VERSION_HEADER_VALUE = "2022-06-28"
@@ -216,6 +219,33 @@ class NotionApiController {
     fun appendChildNodesToParent(parentId: String, parentNode: Element) {
         var urlString = Util.createUrlByPrefixAndSuffix(BASE_URL, BLOCK_URL_PREFIX, BLOCK_URL_SUFFIX, parentId)
         getPageContentRecursive(urlString, null, parentNode)
+    }
+
+    fun changeArticleState(notionPage: NotionPage) {
+        if(!notionPage.isDone) return
+
+        log.info("노션 데이터베이스 완료 처리 시작")
+
+        val urlString = Util.createUrlByPrefixAndSuffix(BASE_URL, PAGE_URL_PREFIX, "", notionPage.parentId)
+
+        val client = DefaultAsyncHttpClient()
+        client
+            .prepare("PATCH", urlString)
+            .setHeader(AUTHORIZATION_HEADER_KEY, Util.getNotionConfigProperty("authorization"))
+            .setHeader(NOTION_VERSION_HEADER_KEY, NOTION_VERSION_HEADER_VALUE)
+            .setHeader("Content-Type", "application/json")
+            .setBody("{\"properties\" : {\"done\" : {\"checkbox\" : true}}}")
+            .execute()
+            .toCompletableFuture()
+            .thenAccept { r ->
+                log.info(
+                    if (r.statusCode == 200) "노션 데이터베이스 완료 처리 성공"
+                    else "노션 데이터베이스 완료 처리 실패 : $r.statusCode"
+                )
+            }
+            .join()
+
+        client.close()
     }
 
 }
