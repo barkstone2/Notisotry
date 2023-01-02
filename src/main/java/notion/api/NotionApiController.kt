@@ -65,6 +65,35 @@ class NotionApiController {
         )
     }
 
+    fun getNewArticlesForRegister() : List<NotionPage>? {
+        val urlString = Util.createUrlByPrefixAndSuffix(BASE_URL, DATABASE_URL_PREFIX, DATABASE_URL_SUFFIX, databaseId)
+
+        val url = URL(urlString)
+        val connection = url.openConnection() as HttpsURLConnection
+        connection.doOutput = true
+        connection.requestMethod = "POST"
+        connection.setRequestProperty(AUTHORIZATION_HEADER_KEY, Util.getNotionConfigProperty("authorization"))
+        connection.setRequestProperty(NOTION_VERSION_HEADER_KEY, NOTION_VERSION_HEADER_VALUE)
+        connection.setRequestProperty("Content-Type", "application/json")
+
+        val jsonParam = Util.objectMapper.writeValueAsString(databaseOptions)
+        connection.outputStream.use { os ->
+            val requestData = jsonParam.toByteArray(charset("utf-8"))
+            os.write(requestData)
+        }
+        connection.connect()
+
+        val response = objectMapper.readValue<Map<String, Any>>(connection.inputStream)
+        val results = objectMapper.convertValue(response["results"], object:TypeReference<List<Map<String, Any>>>(){})
+        val propertiesList = mutableListOf<Map<String, Any>>()
+
+        for (resultMap in results) {
+            propertiesList += objectMapper.convertValue(resultMap["properties"], object:TypeReference<Map<String, Any>>(){})
+        }
+
+        return createNotionPageInfos(propertiesList)
+    }
+
     private fun createNotionPageInfos(propertiesList: List<Map<String, Any>>): List<NotionPage> {
         val result = mutableListOf<NotionPage>()
 
