@@ -7,10 +7,10 @@ import org.jsoup.nodes.Node
 class ImageHtmlParser : HtmlParser {
 
     override fun parse(block: Map<String, Any>) : Node? {
-        val image = block["image"] as HashMap<String, Any>
+        val image = block["image"] as Map<String, Any>
 
         val imageType = image["type"] as String
-        val imageInfo = image[imageType] as HashMap<String, Any>
+        val imageInfo = image[imageType] as Map<String, Any>
         val imageUrl = imageInfo["url"] as String
 
         if(imageUrl.isNullOrEmpty()) return null
