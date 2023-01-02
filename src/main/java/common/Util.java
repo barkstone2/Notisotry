@@ -3,6 +3,7 @@ package common;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.HashMap;
@@ -50,6 +51,27 @@ public class Util {
         builder.append(resourceId);
         builder.append("/");
         builder.append(suffix);
+
+        return builder.toString();
+    }
+
+    public static String addParametersToUrl(String baseUrl, @Nullable Map<String, String> queryStringMap) {
+        if(queryStringMap == null || queryStringMap.isEmpty()) return baseUrl;
+
+        StringBuilder builder = new StringBuilder(baseUrl);
+        builder.append("?");
+
+        queryStringMap
+                .keySet()
+                .stream()
+                .forEach(k -> {
+                    builder.append(k);
+                    builder.append("=");
+                    builder.append(queryStringMap.get(k));
+                    builder.append("&");
+                });
+
+        builder.deleteCharAt(builder.length() - 1);
 
         return builder.toString();
     }
