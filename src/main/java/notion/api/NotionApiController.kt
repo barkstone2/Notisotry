@@ -212,8 +212,11 @@ class NotionApiController {
         if(hasMore) {
             getPageContentRecursive(baseUrl, mapOf("start_cursor" to response["next_cursor"] as String), pageContent)
         }
-
     }
 
+    fun appendChildNodesToParent(parentId: String, parentNode: Element) {
+        var urlString = Util.createUrlByPrefixAndSuffix(BASE_URL, BLOCK_URL_PREFIX, BLOCK_URL_SUFFIX, parentId)
+        getPageContentRecursive(urlString, null, parentNode)
+    }
 
 }
