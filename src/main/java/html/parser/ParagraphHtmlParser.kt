@@ -23,11 +23,11 @@ class ParagraphHtmlParser : HtmlParser {
         return p
     }
 
-    fun createTextNodes(textBlock: HashMap<String, Any>): MutableList<Node> {
+    fun createTextNodes(textBlock: Map<String, Any>, ignoreAnnotations: Boolean = false): MutableList<Node> {
         var plainText = textBlock["plain_text"] as String
         val textNodes = linebreakPlaintext(plainText)
 
-        var innerTag = createInnerTag(textBlock)
+        var innerTag = createInnerTag(textBlock, ignoreAnnotations)
         innerTag?.appendChildren(textNodes)
 
         return innerTag?.let { mutableListOf(it) } ?: textNodes
@@ -46,12 +46,12 @@ class ParagraphHtmlParser : HtmlParser {
         return textNodeList
     }
 
-    private fun createInnerTag(richText: HashMap<String, Any>) : Element? {
+    private fun createInnerTag(richText: Map<String, Any>, ignoreAnnotations: Boolean) : Element? {
         var innerTag = createAnchorTagIfLinkType(richText["href"] as String?)
 
         val (isAnnotatedElement, annotatedAttribute) = isAnnotatedElement(richText)
 
-        if(isAnnotatedElement) {
+        if(isAnnotatedElement && !ignoreAnnotations) {
             innerTag = innerTag ?: Element("span")
             setAnnotatedAttribute(innerTag, annotatedAttribute)
         }
