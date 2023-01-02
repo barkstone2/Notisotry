@@ -20,6 +20,8 @@ class ParagraphHtmlParser : HtmlParser {
             p.appendChildren(textNodes)
         }
 
+        p.attr("data-ke-size", "size16")
+
         return p
     }
 
