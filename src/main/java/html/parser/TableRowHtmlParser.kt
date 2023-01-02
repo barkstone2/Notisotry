@@ -1,5 +1,6 @@
 package html.parser
 
+import common.Util
 import org.jsoup.nodes.Element
 import org.jsoup.nodes.Node
 
@@ -10,12 +11,11 @@ class TableRowHtmlParser : HtmlParser {
         val cells = tableRow["cells"] as List<List<HashMap<String, Any>>>
 
         val tr = Element("tr")
-        val paragraphHtmlParser = ParagraphHtmlParser()
 
         for (cell in cells) {
             val td = Element("td")
             for (cellText in cell) {
-                val textNodes = paragraphHtmlParser.createTextNodes(cellText)
+                val textNodes = Util.paragraphHtmlParser.createTextNodes(cellText)
                 td.appendChildren(textNodes)
             }
             if(!td.hasText()) td.html("&nbsp;")
