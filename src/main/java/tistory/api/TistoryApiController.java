@@ -6,6 +6,10 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.chrome.ChromeDriver;
 
+import javax.net.ssl.HttpsURLConnection;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -77,6 +81,48 @@ public class TistoryApiController {
         }
 
     }
+
+    private void getAccessToken() {
+        String url = Util.addParametersToUrl(ACCESS_TOKEN_URL,
+                Map.of(
+                        "client_id", Util.getTistoryConfigProperty("client_id"),
+                        "client_secret", Util.getTistoryConfigProperty("secret_key"),
+                        "redirect_uri", Util.getTistoryConfigProperty("redirect_url"),
+                        "code", authCode,
+                        "grant_type", "authorization_code")
+        );
+
+        HttpsURLConnection connection = null;
+        try {
+            log.info("티스토리 access_token 획득 시작");
+
+            connection = (HttpsURLConnection) new URL(url).openConnection();
+            connection.connect();
+
+            if (connection.getResponseCode() != 200) {
+                throw new IllegalStateException("티스토리 access_token 획득 실패");
+            }
+
+            try (InputStream in = connection.getInputStream();
+                 ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+
+                byte[] buf = new byte[1024 * 8];
+                int length = 0;
+                while ((length = in.read(buf)) != -1) {
+                    out.write(buf, 0, length);
+                }
+                accessToken = new String(out.toByteArray(), "UTF-8");
+                accessToken = accessToken.substring(accessToken.indexOf("=") + 1);
+            }
+
+            connection.disconnect();
+        } catch (Exception e) {
+            connection.disconnect();
+            log.info("티스토리 access_token 획득 실패");
+        }
+
+    }
+
 
     private void busyWaitForSelenium(ChromeDriver driver, By locator) throws InterruptedException {
         while (true) {
