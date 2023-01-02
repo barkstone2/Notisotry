@@ -27,6 +27,78 @@ public class TistoryApiController {
     private String authCode;
     private String accessToken;
 
+
+    public String uploadImageFileAndGetReplacer(@NotNull String imageUrl) {
+
+        String url = Util.addParametersToUrl(IMAGE_UPLOAD_URL, Map.of(
+                "access_token", accessToken,
+                "blogName", Util.getTistoryConfigProperty("blogName"),
+                "output", "json"
+        ));
+
+        Map<String, Object> response;
+        HttpsURLConnection connection = null;
+
+        try {
+            log.info("티스토리 이미지 첨부 로직 시작");
+
+            String boundary = "^-----^";
+            String LINE_FEED = "\r\n";
+            String charset = "UTF-8";
+            connection = (HttpsURLConnection) new URL(url).openConnection();
+            connection.setUseCaches(false);
+            connection.setDoOutput(true);
+            connection.setDoInput(true);
+            connection.setRequestMethod("POST");
+            connection.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
+
+            OutputStream outputStream = connection.getOutputStream();
+            PrintWriter writer = new PrintWriter(new OutputStreamWriter(outputStream, charset), true);
+
+            /** 파일 데이터를 넣는 부분**/
+            writer.append("--" + boundary).append(LINE_FEED);
+            writer.append("Content-Disposition: form-data; name=\"uploadedfile\"; filename=\"" + UUID.randomUUID() + "\"").append(LINE_FEED);
+            writer.append("Content-Type: " + guessImageType(imageUrl)).append(LINE_FEED);
+            writer.append("Content-Transfer-Encoding: binary").append(LINE_FEED);
+            writer.append(LINE_FEED);
+            writer.flush();
+
+            BufferedInputStream bufferedInputStream = new BufferedInputStream(new URL(imageUrl).openStream());
+            byte[] buffer = new byte[1024];
+            int bytesRead;
+            while ((bytesRead = bufferedInputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesRead);
+            }
+            outputStream.flush();
+            bufferedInputStream.close();
+            writer.append(LINE_FEED);
+            writer.flush();
+
+            writer.append("--" + boundary + "--").append(LINE_FEED);
+            writer.close();
+
+            int responseCode = connection.getResponseCode();
+
+            if (responseCode == HttpURLConnection.HTTP_OK || responseCode == HttpURLConnection.HTTP_CREATED) {
+                response = Util.objectMapper.readValue(connection.getInputStream(), HashMap.class);
+                response = (Map<String, Object>) response.get("tistory");
+
+                if (!response.get("status").equals("200")) return "";
+
+                return response.get("replacer").toString();
+            } else {
+                log.info("티스토리 이미지 업로드 실패");
+            }
+
+            connection.disconnect();
+        } catch (Exception e) {
+            connection.disconnect();
+            log.info("티스토리 이미지 업로드 실패");
+        }
+
+        return "";
+    }
+
     private void authorizeTistory() {
 
         String url = Util.addParametersToUrl(AUTHORIZE_URL,
@@ -165,7 +237,6 @@ public class TistoryApiController {
                 .forEach(category -> categoryMap.put(category.getName(), Optional.of(category.getId())));
     }
 
-
     private void busyWaitForSelenium(ChromeDriver driver, By locator) throws InterruptedException {
         while (true) {
             try {
@@ -175,6 +246,14 @@ public class TistoryApiController {
             } catch (NoSuchElementException e) {
             }
         }
+    }
+
+    private String guessImageType(String imageUrl) {
+        if(imageUrl.contains(".png")) return "image/png";
+        else if(imageUrl.contains(".webp")) return "image/webp";
+        else if(imageUrl.contains(".gif")) return "image/gif";
+        else if(imageUrl.contains(".jpeg") || imageUrl.contains(".jpg")) return "image/jpeg";
+        return "application/octet-stream";
     }
 
 }
