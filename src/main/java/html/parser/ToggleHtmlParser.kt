@@ -10,18 +10,27 @@ class ToggleHtmlParser : HtmlParser, ParentNode() {
         val richTexts = toggleInfo["rich_text"] as List<Map<String, Any>>
 
         val toggle = Element("div")
-
-        for (richText in richTexts) {
-            val textNodes = Util.paragraphHtmlParser.createTextNodes(richText)
-            toggle.appendChildren(textNodes)
-        }
-
-        toggle
             .attr("data-ke-type", "moreLess")
             .attr("data-text-more", "더보기")
             .attr("data-text-less", "닫기")
 
-        appendChildIfExist(block, toggle)
+        val toggleButton = Element("a")
+            .addClass("btn-toggle-moreless")
+            .text("더보기")
+
+        val toggleContent = Element("div")
+            .addClass("moreless-content")
+
+        for (richText in richTexts) {
+            val textNodes = Util.paragraphHtmlParser.createTextNodes(richText)
+            toggleContent.appendChildren(textNodes)
+        }
+
+        appendChildIfExist(block, toggleContent)
+
+        toggle
+            .appendChild(toggleButton)
+            .appendChild(toggleContent)
 
         return toggle
     }
