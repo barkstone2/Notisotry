@@ -6,6 +6,8 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import common.Util
 import html.parser.*
 import notion.NotionBlockType
+import notion.dto.NotionPage
+import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import java.io.File
 import java.net.URL
@@ -56,6 +58,22 @@ class NotionApiController {
         databaseOptions = objectMapper.readValue(
             File("./src/main/resources/notion_database_filter_query.json"),
         )
+    }
+
+    private fun getPageContent(page: NotionPage) : String {
+        var urlString = Util.createUrlByPrefixAndSuffix(BASE_URL, BLOCK_URL_PREFIX, BLOCK_URL_SUFFIX, page.pageId)
+
+        val pageContent = Document("")
+        pageContent.outputSettings().prettyPrint(false)
+
+        val article = Element("article")
+        article.id("notionArticle")
+
+        getPageContentRecursive(urlString, null, article)
+
+        pageContent.appendChild(article)
+
+        return pageContent.html()
     }
 
     private fun getPageContentRecursive(baseUrl: String, parameterMap: Map<String, String>?, pageContent: Element) {
