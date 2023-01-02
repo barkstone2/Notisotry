@@ -3,6 +3,7 @@ package tistory.api;
 import com.fasterxml.jackson.core.type.TypeReference;
 import common.Util;
 import lombok.extern.slf4j.Slf4j;
+import notion.dto.NotionPage;
 import org.jetbrains.annotations.NotNull;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
@@ -22,8 +23,9 @@ public class TistoryApiController {
     private static final String ACCESS_TOKEN_URL = "https://www.tistory.com/oauth/access_token";
     private static final String GET_CATEGORY_URL = "https://www.tistory.com/apis/category/list";
     private static final String IMAGE_UPLOAD_URL = "https://www.tistory.com/apis/post/attach";
+    private static final String ARTICLE_WRITE_URL = "https://www.tistory.com/apis/post/write";
 
-    private Map<String, Optional<String>> categoryMap = new HashMap<>();
+    private Map<String, String> categoryMap = new HashMap<>();
 
     private String authCode;
     private String accessToken;
@@ -34,6 +36,69 @@ public class TistoryApiController {
         initCategoryMap();
     }
 
+    public void writeNewArticle(NotionPage notionPage) {
+
+        Map<String, String> param = Map.of(
+                "access_token", accessToken,
+                "output", "json",
+                "blogName", Util.getTistoryConfigProperty("blogName"),
+                "title", notionPage.getTitle(),
+                "content", notionPage.getContent(),
+                "visibility", notionPage.getReleaseState(),
+                "category", getCategoryIdByCategoryName(notionPage.getCategory()),
+                "published", notionPage.getReleaseDate(),
+                "tag", notionPage.getTag(),
+                "acceptComment", notionPage.isAllowComment()
+        );
+
+        String url = ARTICLE_WRITE_URL;
+
+        Map<String, Object> response;
+        HttpsURLConnection connection = null;
+
+        try {
+            log.info("티스토리 게시글 등록 로직 시작");
+
+            connection = (HttpsURLConnection) new URL(url).openConnection();
+            connection.setRequestMethod("POST");
+            connection.setDoOutput(true);
+            connection.setRequestProperty("Content-Type", "application/json");
+
+            OutputStream os = connection.getOutputStream();
+            String jsonParam = Util.objectMapper.writeValueAsString(param);
+
+            byte request_data[] = jsonParam.getBytes("utf-8");
+            os.write(request_data);
+
+            os.flush();
+            os.close();
+
+            connection.connect();
+
+            response = Util.objectMapper.readValue(connection.getInputStream(), Map.class);
+            connection.disconnect();
+
+            response = (Map<String, Object>) response.get("tistory");
+
+            if (!response.get("status").equals("200")) {
+                throw new IllegalStateException("");
+            }
+
+            notionPage.uploadSuccess();
+
+            log.info("게시글 등록 성공");
+        } catch (Exception e) {
+            connection.disconnect();
+            log.info("게시글 등록 실패");
+        }
+
+    }
+
+    public String getCategoryIdByCategoryName(String categoryName) {
+        if(categoryMap == null) throw new IllegalStateException("need to reload category");
+
+        return categoryMap.get(categoryName) == null ? "0" : categoryMap.get(categoryName);
+    }
 
     public String uploadImageFileAndGetReplacer(@NotNull String imageUrl) {
 
@@ -241,7 +306,7 @@ public class TistoryApiController {
 
         categoryList
                 .stream()
-                .forEach(category -> categoryMap.put(category.getName(), Optional.of(category.getId())));
+                .forEach(category -> categoryMap.put(category.getName(), category.getId()));
     }
 
     private void busyWaitForSelenium(ChromeDriver driver, By locator) throws InterruptedException {
@@ -262,5 +327,6 @@ public class TistoryApiController {
         else if(imageUrl.contains(".jpeg") || imageUrl.contains(".jpg")) return "image/jpeg";
         return "application/octet-stream";
     }
+
 
 }
