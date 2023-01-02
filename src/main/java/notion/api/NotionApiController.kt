@@ -3,6 +3,9 @@ package notion.api
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import common.Util
+import html.parser.*
+import notion.NotionBlockType
+import org.jsoup.nodes.Element
 import java.io.File
 
 private const val BASE_URL = "https://api.notion.com/v1"
@@ -26,6 +29,24 @@ class NotionApiController {
     init {
         initDatabaseId()
     }
+
+    private val htmlParserMapper = mapOf(
+        Pair(NotionBlockType.IMAGE, ImageHtmlParser()),
+        Pair(NotionBlockType.BULLETED_LIST_ITEM, ListHtmlParser()),
+        Pair(NotionBlockType.NUMBERED_LIST_ITEM, ListHtmlParser()),
+        Pair(NotionBlockType.CODE, CodeHtmlParser()),
+        Pair(NotionBlockType.HEADING_1, HeadingHtmlParser()),
+        Pair(NotionBlockType.HEADING_2, HeadingHtmlParser()),
+        Pair(NotionBlockType.HEADING_3, HeadingHtmlParser()),
+        Pair(NotionBlockType.PARAGRAPH, ParagraphHtmlParser()),
+        Pair(NotionBlockType.TO_DO, TodoHtmlParser()),
+        Pair(NotionBlockType.TOGGLE, ToggleHtmlParser()),
+        Pair(NotionBlockType.TABLE, TableHtmlParser()),
+        Pair(NotionBlockType.TABLE_ROW, TableRowHtmlParser()),
+        Pair(NotionBlockType.QUOTE, QuoteHtmlParser()),
+        Pair(NotionBlockType.CALLOUT, CalloutHtmlParser()),
+        Pair(NotionBlockType.DIVIDER, DividerHtmlParser()),
+    )
 
     private fun initDatabaseId() {
         databaseId = Util.getNotionConfigProperty("database_id")
