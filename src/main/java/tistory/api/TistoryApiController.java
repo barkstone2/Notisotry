@@ -28,6 +28,12 @@ public class TistoryApiController {
     private String authCode;
     private String accessToken;
 
+    public TistoryApiController() {
+        authorizeTistory();
+        getAccessToken();
+        initCategoryMap();
+    }
+
 
     public String uploadImageFileAndGetReplacer(@NotNull String imageUrl) {
 
