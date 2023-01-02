@@ -157,6 +157,7 @@ public class TistoryApiController {
 
                 if (!response.get("status").equals("200")) return "";
 
+                log.info("이미지 업로드 성공");
                 return response.get("replacer").toString();
             } else {
                 log.info("티스토리 이미지 업로드 실패");
