@@ -8,6 +8,7 @@ import java.util.List;
 
 public class NotionPage {
 
+    private String parentId;
     private String pageId;
     private String title;
     private List<String> tag;
@@ -19,7 +20,7 @@ public class NotionPage {
     private String content;
     private boolean done = false;
 
-    public NotionPage(String title, List<String> tag, String pageId, String category, String releaseState, LocalDateTime releaseDate, boolean allowComment) {
+    public NotionPage(String title, List<String> tag, String pageId, String category, String releaseState, LocalDateTime releaseDate, boolean allowComment, String parentId) {
         this.title = title;
         this.tag = tag;
         this.pageId = pageId;
@@ -27,21 +28,18 @@ public class NotionPage {
         this.releaseState = releaseState;
         this.releaseDate = releaseDate;
         this.allowComment = allowComment;
-    }
-
-    public NotionPage(String title, List<String> tag, String pageId, String category, String releaseState, LocalDateTime releaseDate, boolean allowComment, String content, boolean done) {
-        this.title = title;
-        this.tag = tag;
-        this.pageId = pageId;
-        this.category = category;
-        this.releaseState = releaseState;
-        this.releaseDate = releaseDate;
-        this.allowComment = allowComment;
-        this.content = content;
-        this.done = done;
+        this.parentId = parentId;
     }
 
     public NotionPage() {
+    }
+
+    public String getParentId() {
+        return parentId;
+    }
+
+    public void setParentId(String parentId) {
+        this.parentId = parentId;
     }
 
     public String getTitle() {

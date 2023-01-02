@@ -85,93 +85,92 @@ class NotionApiController {
 
         val response = objectMapper.readValue<Map<String, Any>>(connection.inputStream)
         val results = objectMapper.convertValue(response["results"], object:TypeReference<List<Map<String, Any>>>(){})
-        val propertiesList = mutableListOf<Map<String, Any>>()
+        val notionPageInfos = mutableListOf<NotionPage>()
 
         for (resultMap in results) {
-            propertiesList += objectMapper.convertValue(resultMap["properties"], object:TypeReference<Map<String, Any>>(){})
+            notionPageInfos += createNotionPageInfo(resultMap)
         }
 
-        return createNotionPageInfos(propertiesList)
+        return notionPageInfos
     }
 
-    private fun createNotionPageInfos(propertiesList: List<Map<String, Any>>): List<NotionPage> {
-        val result = mutableListOf<NotionPage>()
+    private fun createNotionPageInfo(resultMap: Map<String, Any>): NotionPage {
+        val parentId = resultMap["id"] as String
+        val properties = objectMapper.convertValue(resultMap["properties"], object : TypeReference<Map<String, Any>>() {})
 
-        for (property in propertiesList) {
-            val startTime = System.currentTimeMillis()
-            log.info("create the notion page info start")
-            val tag = objectMapper.convertValue(property["tag"], object : TypeReference<Map<String, Any>>() {})
-            val tags = objectMapper.convertValue(
-                tag["multi_select"],
-                object : TypeReference<List<Map<String, String>>?>() {})
-            val tagNameList = tags
-                ?.stream()
-                ?.map { t: Map<String, String> -> t["name"] }
-                ?.collect(Collectors.toList())
+        val startTime = System.currentTimeMillis()
+        log.info("create the notion page info start")
+        val tag = objectMapper.convertValue(properties["tag"], object : TypeReference<Map<String, Any>>() {})
+        val tags = objectMapper.convertValue(
+            tag["multi_select"],
+            object : TypeReference<List<Map<String, String>>?>() {})
+        val tagNameList = tags
+            ?.stream()
+            ?.map { t: Map<String, String> -> t["name"] }
+            ?.collect(Collectors.toList())
 
-            val pageLink =
-                objectMapper.convertValue(property["page-link"], object : TypeReference<Map<String, String>>() {})
-            val pageId =
-                with(pageLink["url"]) {
-                    var temp = this ?: throw IllegalStateException("게시글 링크가 누락됐습니다.")
-                    temp = if (temp.contains("-")) {
-                        temp.substring(temp.lastIndexOf("-") + 1)
-                    } else {
-                        temp.substring(temp.lastIndexOf("/") + 1)
-                    }
-                    temp
+        val pageLink =
+            objectMapper.convertValue(properties["page-link"], object : TypeReference<Map<String, String>>() {})
+        val pageId =
+            with(pageLink["url"]) {
+                var temp = this ?: throw IllegalStateException("게시글 링크가 누락됐습니다.")
+                temp = if (temp.contains("-")) {
+                    temp.substring(temp.lastIndexOf("-") + 1)
+                } else {
+                    temp.substring(temp.lastIndexOf("/") + 1)
                 }
+                temp
+            }
 
-            val category =
-                objectMapper.convertValue(property["category"], object : TypeReference<Map<String, Any>>() {})
-            val selectedCategory =
-                objectMapper.convertValue(category["select"], object : TypeReference<Map<String, String>?>() {})
-            val categoryName = selectedCategory?.get("name")
+        val category =
+            objectMapper.convertValue(properties["category"], object : TypeReference<Map<String, Any>>() {})
+        val selectedCategory =
+            objectMapper.convertValue(category["select"], object : TypeReference<Map<String, String>?>() {})
+        val categoryName = selectedCategory?.get("name")
 
-            val releaseState =
-                objectMapper.convertValue(property["release-state"], object : TypeReference<Map<String, Any>>() {})
-            val status =
-                objectMapper.convertValue(releaseState["status"], object : TypeReference<Map<String, String>>() {})
-            val releaseStateString = status["name"]
+        val releaseState =
+            objectMapper.convertValue(properties["release-state"], object : TypeReference<Map<String, Any>>() {})
+        val status =
+            objectMapper.convertValue(releaseState["status"], object : TypeReference<Map<String, String>>() {})
+        val releaseStateString = status["name"]
 
-            val allowComment =
-                objectMapper.convertValue(
-                    property["allow-comment"],
-                    object : TypeReference<Map<String, String>>() {})
-            val isAllowComment = objectMapper.convertValue(allowComment["checkbox"], Boolean::class.java)
+        val allowComment =
+            objectMapper.convertValue(
+                properties["allow-comment"],
+                object : TypeReference<Map<String, String>>() {})
+        val isAllowComment = objectMapper.convertValue(allowComment["checkbox"], Boolean::class.java)
 
-            val titleWrap =
-                objectMapper.convertValue(property["title"], object : TypeReference<Map<String, Any>>() {})
-            val title =
-                objectMapper.convertValue(
-                    titleWrap["title"], object : TypeReference<MutableList<Map<String, Any>>>() {})
-            val titleString = objectMapper.convertValue(
-                if (title?.size == 0) "default-title" else title[0]?.get("plain_text") ?: "default-title",
-                String::class.java
-            )
+        val titleWrap =
+            objectMapper.convertValue(properties["title"], object : TypeReference<Map<String, Any>>() {})
+        val title =
+            objectMapper.convertValue(
+                titleWrap["title"], object : TypeReference<MutableList<Map<String, Any>>>() {})
+        val titleString = objectMapper.convertValue(
+            if (title?.size == 0) "default-title" else title[0]?.get("plain_text") ?: "default-title",
+            String::class.java
+        )
 
-            val releaseDate =
-                objectMapper.convertValue(property["release-date"], object : TypeReference<Map<String, Any>>() {})
-            val date =
-                objectMapper.convertValue(releaseDate["date"], object : TypeReference<Map<String, Any>?>() {})
-            val releaseDateText = objectMapper.convertValue(date?.get("start"), String::class.java)
-            val releaseDateValue =
-                if (releaseDateText != null)
-                    LocalDateTime.parse(releaseDateText, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXX"))
-                else LocalDateTime.now()
+        val releaseDate =
+            objectMapper.convertValue(properties["release-date"], object : TypeReference<Map<String, Any>>() {})
+        val date =
+            objectMapper.convertValue(releaseDate["date"], object : TypeReference<Map<String, Any>?>() {})
+        val releaseDateText = objectMapper.convertValue(date?.get("start"), String::class.java)
+        val releaseDateValue =
+            if (releaseDateText != null)
+                LocalDateTime.parse(releaseDateText, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXX"))
+            else LocalDateTime.now()
 
-            val notionPage = NotionPage(
-                titleString, tagNameList, pageId, categoryName,
-                releaseStateString, releaseDateValue, isAllowComment
-            )
-            notionPage.content = getPageContent(notionPage)
+        val notionPage = NotionPage(
+            titleString, tagNameList, pageId, categoryName,
+            releaseStateString, releaseDateValue, isAllowComment, parentId
+        )
+        notionPage.content = getPageContent(notionPage)
 
-            result += notionPage
-            val endTime = System.currentTimeMillis()
-            log.info("created complete page info - title : {}", titleString)
-            log.info("elapsed time is : {} second", (endTime - startTime) / 1000)
-        }
-        return result
+        val endTime = System.currentTimeMillis()
+        log.info("created complete page info - title : {}", titleString)
+        log.info("elapsed time is : {} second", (endTime - startTime) / 1000)
+
+        return notionPage
     }
 
     private fun getPageContent(page: NotionPage) : String {
