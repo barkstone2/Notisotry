@@ -3,12 +3,16 @@ package common;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import html.parser.ParagraphHtmlParser;
 import lombok.extern.slf4j.Slf4j;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeDriverLogLevel;
+import org.openqa.selenium.chrome.ChromeOptions;
 
 import javax.annotation.Nullable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
 
 @Slf4j
 public class Util {
@@ -43,6 +47,20 @@ public class Util {
 
     public static String getNotionConfigProperty(String key) {
         return getConfigProperty("notion", key);
+    }
+
+    public static String getTistoryConfigProperty(String key) {
+        return getConfigProperty("tistory", key);
+    }
+
+    public static ChromeDriver getChromeDriver() {
+        ChromeOptions options = new ChromeOptions();
+        options.setLogLevel(ChromeDriverLogLevel.OFF);
+
+        ChromeDriver driver = new ChromeDriver(options);
+        driver.setLogLevel(Level.OFF);
+
+        return driver;
     }
 
     public static String createUrlByPrefixAndSuffix(String baseUrl, String prefix, String suffix, String resourceId) {
