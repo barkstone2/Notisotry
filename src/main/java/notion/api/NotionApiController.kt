@@ -1,5 +1,6 @@
 package notion.api
 
+import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import common.Util
@@ -7,6 +8,8 @@ import html.parser.*
 import notion.NotionBlockType
 import org.jsoup.nodes.Element
 import java.io.File
+import java.net.URL
+import javax.net.ssl.HttpsURLConnection
 
 private const val BASE_URL = "https://api.notion.com/v1"
 
@@ -53,6 +56,31 @@ class NotionApiController {
         databaseOptions = objectMapper.readValue(
             File("./src/main/resources/notion_database_filter_query.json"),
         )
+    }
+
+    private fun getPageContentRecursive(baseUrl: String, parameterMap: Map<String, String>?, pageContent: Element) {
+        val urlString = Util.addParametersToUrl(baseUrl, parameterMap)
+        val url = URL(urlString)
+        val connection = url.openConnection() as HttpsURLConnection
+        connection.setRequestProperty(AUTHORIZATION_HEADER_KEY, Util.getNotionConfigProperty("authorization"))
+        connection.setRequestProperty(NOTION_VERSION_HEADER_KEY, NOTION_VERSION_HEADER_VALUE)
+
+        connection.connect()
+
+        val response = objectMapper.readValue<Map<String, Any>>(connection.inputStream)
+        val hasMore = response["has_more"] as Boolean
+        val results = objectMapper.convertValue(response["results"], object:TypeReference<List<Map<String, Any>>>(){})
+
+        for (result in results) {
+            val htmlParser = htmlParserMapper[NotionBlockType.getByType(result["type"] as String)] ?: continue
+            val parseResult = htmlParser.parse(result) ?: continue
+            pageContent.appendChild(parseResult)
+        }
+
+        if(hasMore) {
+            getPageContentRecursive(baseUrl, mapOf("start_cursor" to response["next_cursor"] as String), pageContent)
+        }
+
     }
 
 
