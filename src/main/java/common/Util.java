@@ -1,6 +1,7 @@
 package common;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import html.parser.ParagraphHtmlParser;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.annotation.Nullable;
@@ -13,6 +14,7 @@ import java.util.Map;
 public class Util {
 
     public static ObjectMapper objectMapper = new ObjectMapper();
+    public static ParagraphHtmlParser paragraphHtmlParser = new ParagraphHtmlParser();
     private static Map<String, Map<String, String>> config;
 
     public static void initConfig() {
