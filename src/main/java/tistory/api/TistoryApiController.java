@@ -1,18 +1,18 @@
 package tistory.api;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import common.Util;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.chrome.ChromeDriver;
+import tistory.TistoryCategory;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Slf4j
 public class TistoryApiController {
@@ -121,6 +121,48 @@ public class TistoryApiController {
             log.info("티스토리 access_token 획득 실패");
         }
 
+    }
+
+    private void initCategoryMap() {
+
+        String url = Util.addParametersToUrl(GET_CATEGORY_URL, Map.of(
+                "access_token", accessToken,
+                "output", "json",
+                "blogName", Util.getTistoryConfigProperty("blogName")
+        ));
+
+        Map<String, Object> response = null;
+        HttpsURLConnection connection = null;
+
+        try {
+            log.info("카테고리 조회 시작");
+
+            connection = (HttpsURLConnection) new URL(url).openConnection();
+
+            connection.connect();
+
+            response = Util.objectMapper.readValue(connection.getInputStream(), HashMap.class);
+            connection.disconnect();
+
+            response = (HashMap<String, Object>) response.get("tistory");
+
+            if (!response.get("status").equals("200")) {
+                throw new IllegalStateException("");
+            }
+
+            response = (Map<String, Object>) response.get("item");
+
+        } catch (Exception e) {
+            connection.disconnect();
+            log.info("카테고리 조회 실패");
+        }
+
+        List<TistoryCategory> categoryList = Util.objectMapper
+                .convertValue(response.get("categories"), new TypeReference<ArrayList<TistoryCategory>>(){});
+
+        categoryList
+                .stream()
+                .forEach(category -> categoryMap.put(category.getName(), Optional.of(category.getId())));
     }
 
 
