@@ -42,4 +42,16 @@ public class Util {
         return getConfigProperty("notion", key);
     }
 
+    public static String createUrlByPrefixAndSuffix(String baseUrl, String prefix, String suffix, String resourceId) {
+        StringBuilder builder = new StringBuilder(baseUrl);
+        builder.append("/");
+        builder.append(prefix);
+        builder.append("/");
+        builder.append(resourceId);
+        builder.append("/");
+        builder.append(suffix);
+
+        return builder.toString();
+    }
+
 }
