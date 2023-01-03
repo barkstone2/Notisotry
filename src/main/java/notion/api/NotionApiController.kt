@@ -65,7 +65,20 @@ class NotionApiController {
     private fun initDatabaseId() {
         databaseId = Util.getNotionConfigProperty("database_id")
         databaseOptions = objectMapper.readValue(
-            File("./src/main/resources/notion_database_filter_query.json"),
+            "{\n" +
+                "  \"filter\": {\n" +
+                "    \"property\": \"done\",\n" +
+                "    \"checkbox\": {\n" +
+                "      \"equals\": false\n" +
+                "    }\n" +
+                "  },\n" +
+                "  \"sorts\": [\n" +
+                "    {\n" +
+                "      \"property\": \"release-date\",\n" +
+                "      \"direction\": \"ascending\"\n" +
+                "    }\n" +
+                "  ]\n" +
+                "}"
         )
     }
 
