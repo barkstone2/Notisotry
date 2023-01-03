@@ -23,7 +23,7 @@ public class Util {
 
     public static void initConfig() {
 
-        String filePath = "./src/main/resources/config.json";
+        String filePath = "./config.json";
         File configFile = new File(filePath);
 
         if(configFile.exists()) {
