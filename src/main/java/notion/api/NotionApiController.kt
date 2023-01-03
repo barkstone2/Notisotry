@@ -113,7 +113,7 @@ class NotionApiController {
     private fun createNotionPageInfo(resultMap: Map<String, Any>): NotionPage {
         log.info("-> 노션 데이터베이스 페이지 정보 생성 시작")
         val startTime = System.currentTimeMillis()
-        var notionPage = NotionPage();
+        var notionPage: NotionPage
         var titleString = ""
 
         try {
@@ -181,7 +181,7 @@ class NotionApiController {
                     LocalDateTime.parse(releaseDateText, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXX"))
                 else LocalDateTime.now()
 
-            val notionPage = NotionPage(
+            notionPage = NotionPage(
                 titleString, tagNameList, pageId, categoryName,
                 releaseStateString, releaseDateValue, isAllowComment, parentId
             )
