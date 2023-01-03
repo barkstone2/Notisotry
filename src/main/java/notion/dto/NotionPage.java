@@ -76,7 +76,7 @@ public class NotionPage {
     }
 
     public String getReleaseState() {
-        return releaseState.equals("비공개") ? "0" : "3";
+        return releaseState == null || releaseState.equals("비공개") ? "0" : "3";
     }
 
     public void setReleaseState(String releaseState) {
