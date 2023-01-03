@@ -17,6 +17,7 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.stream.Collectors
 import javax.net.ssl.HttpsURLConnection
+import kotlin.system.exitProcess
 
 private const val BASE_URL = "https://api.notion.com/v1"
 
@@ -69,125 +70,159 @@ class NotionApiController {
     }
 
     fun getNewArticlesForRegister() : List<NotionPage>? {
-        val urlString = Util.createUrlByPrefixAndSuffix(BASE_URL, DATABASE_URL_PREFIX, DATABASE_URL_SUFFIX, databaseId)
+        log.info("노션 데이터베이스 목록 로딩 시작")
 
-        val url = URL(urlString)
-        val connection = url.openConnection() as HttpsURLConnection
-        connection.doOutput = true
-        connection.requestMethod = "POST"
-        connection.setRequestProperty(AUTHORIZATION_HEADER_KEY, Util.getNotionConfigProperty("authorization"))
-        connection.setRequestProperty(NOTION_VERSION_HEADER_KEY, NOTION_VERSION_HEADER_VALUE)
-        connection.setRequestProperty("Content-Type", "application/json")
-
-        val jsonParam = Util.objectMapper.writeValueAsString(databaseOptions)
-        connection.outputStream.use { os ->
-            val requestData = jsonParam.toByteArray(charset("utf-8"))
-            os.write(requestData)
-        }
-        connection.connect()
-
-        val response = objectMapper.readValue<Map<String, Any>>(connection.inputStream)
-        val results = objectMapper.convertValue(response["results"], object:TypeReference<List<Map<String, Any>>>(){})
         val notionPageInfos = mutableListOf<NotionPage>()
 
-        for (resultMap in results) {
-            notionPageInfos += createNotionPageInfo(resultMap)
+        try {
+
+            val urlString =
+                Util.createUrlByPrefixAndSuffix(BASE_URL, DATABASE_URL_PREFIX, DATABASE_URL_SUFFIX, databaseId)
+
+            val url = URL(urlString)
+            val connection = url.openConnection() as HttpsURLConnection
+            connection.doOutput = true
+            connection.requestMethod = "POST"
+            connection.setRequestProperty(AUTHORIZATION_HEADER_KEY, Util.getNotionConfigProperty("authorization"))
+            connection.setRequestProperty(NOTION_VERSION_HEADER_KEY, NOTION_VERSION_HEADER_VALUE)
+            connection.setRequestProperty("Content-Type", "application/json")
+
+            val jsonParam = Util.objectMapper.writeValueAsString(databaseOptions)
+            connection.outputStream.use { os ->
+                val requestData = jsonParam.toByteArray(charset("utf-8"))
+                os.write(requestData)
+            }
+            connection.connect()
+
+            val response = objectMapper.readValue<Map<String, Any>>(connection.inputStream)
+            val results =
+                objectMapper.convertValue(response["results"], object : TypeReference<List<Map<String, Any>>>() {})
+
+            for (resultMap in results) {
+                notionPageInfos += createNotionPageInfo(resultMap)
+            }
+
+        } catch (e : Exception) {
+            log.info("노션 데이터베이스 목록 로딩 실패")
+            exitProcess(0)
         }
 
         return notionPageInfos
     }
 
     private fun createNotionPageInfo(resultMap: Map<String, Any>): NotionPage {
-        val parentId = resultMap["id"] as String
-        val properties = objectMapper.convertValue(resultMap["properties"], object : TypeReference<Map<String, Any>>() {})
-
+        log.info("-> 노션 데이터베이스 페이지 정보 생성 시작")
         val startTime = System.currentTimeMillis()
-        log.info("create the notion page info start")
-        val tag = objectMapper.convertValue(properties["tag"], object : TypeReference<Map<String, Any>>() {})
-        val tags = objectMapper.convertValue(
-            tag["multi_select"],
-            object : TypeReference<List<Map<String, String>>?>() {})
-        val tagNameList = tags
-            ?.stream()
-            ?.map { t: Map<String, String> -> t["name"] }
-            ?.collect(Collectors.toList())
+        var notionPage = NotionPage();
+        var titleString = ""
 
-        val pageLink =
-            objectMapper.convertValue(properties["page-link"], object : TypeReference<Map<String, String>>() {})
-        val pageId =
-            with(pageLink["url"]) {
-                var temp = this ?: throw IllegalStateException("게시글 링크가 누락됐습니다.")
-                temp = if (temp.contains("-")) {
-                    temp.substring(temp.lastIndexOf("-") + 1)
-                } else {
-                    temp.substring(temp.lastIndexOf("/") + 1)
+        try {
+
+            val parentId = resultMap["id"] as String
+            val properties = objectMapper.convertValue(resultMap["properties"], object : TypeReference<Map<String, Any>>() {})
+
+            val tag = objectMapper.convertValue(properties["tag"], object : TypeReference<Map<String, Any>>() {})
+            val tags = objectMapper.convertValue(
+                tag["multi_select"],
+                object : TypeReference<List<Map<String, String>>?>() {})
+            val tagNameList = tags
+                ?.stream()
+                ?.map { t: Map<String, String> -> t["name"] }
+                ?.collect(Collectors.toList())
+
+            val pageLink =
+                objectMapper.convertValue(properties["page-link"], object : TypeReference<Map<String, String>>() {})
+            val pageId =
+                with(pageLink["url"]) {
+                    var temp = this ?: throw IllegalStateException("게시글 링크가 누락됐습니다.")
+                    temp = if (temp.contains("-")) {
+                        temp.substring(temp.lastIndexOf("-") + 1)
+                    } else {
+                        temp.substring(temp.lastIndexOf("/") + 1)
+                    }
+                    temp
                 }
-                temp
-            }
 
-        val category =
-            objectMapper.convertValue(properties["category"], object : TypeReference<Map<String, Any>>() {})
-        val selectedCategory =
-            objectMapper.convertValue(category["select"], object : TypeReference<Map<String, String>?>() {})
-        val categoryName = selectedCategory?.get("name")
+            val category =
+                objectMapper.convertValue(properties["category"], object : TypeReference<Map<String, Any>>() {})
+            val selectedCategory =
+                objectMapper.convertValue(category["select"], object : TypeReference<Map<String, String>?>() {})
+            val categoryName = selectedCategory?.get("name")
 
-        val releaseState =
-            objectMapper.convertValue(properties["release-state"], object : TypeReference<Map<String, Any>>() {})
-        val status =
-            objectMapper.convertValue(releaseState["status"], object : TypeReference<Map<String, String>>() {})
-        val releaseStateString = status["name"]
+            val releaseState =
+                objectMapper.convertValue(properties["release-state"], object : TypeReference<Map<String, Any>>() {})
+            val status =
+                objectMapper.convertValue(releaseState["status"], object : TypeReference<Map<String, String>>() {})
+            val releaseStateString = status["name"]
 
-        val allowComment =
-            objectMapper.convertValue(
-                properties["allow-comment"],
-                object : TypeReference<Map<String, String>>() {})
-        val isAllowComment = objectMapper.convertValue(allowComment["checkbox"], Boolean::class.java)
+            val allowComment =
+                objectMapper.convertValue(
+                    properties["allow-comment"],
+                    object : TypeReference<Map<String, String>>() {})
+            val isAllowComment = objectMapper.convertValue(allowComment["checkbox"], Boolean::class.java)
 
-        val titleWrap =
-            objectMapper.convertValue(properties["title"], object : TypeReference<Map<String, Any>>() {})
-        val title =
-            objectMapper.convertValue(
-                titleWrap["title"], object : TypeReference<MutableList<Map<String, Any>>>() {})
-        val titleString = objectMapper.convertValue(
-            if (title?.size == 0) "default-title" else title[0]?.get("plain_text") ?: "default-title",
-            String::class.java
-        )
+            val titleWrap =
+                objectMapper.convertValue(properties["title"], object : TypeReference<Map<String, Any>>() {})
+            val title =
+                objectMapper.convertValue(
+                    titleWrap["title"], object : TypeReference<MutableList<Map<String, Any>>>() {})
+            titleString = objectMapper.convertValue(
+                if (title?.size == 0) "default-title" else title[0]?.get("plain_text") ?: "default-title",
+                String::class.java
+            )
 
-        val releaseDate =
-            objectMapper.convertValue(properties["release-date"], object : TypeReference<Map<String, Any>>() {})
-        val date =
-            objectMapper.convertValue(releaseDate["date"], object : TypeReference<Map<String, Any>?>() {})
-        val releaseDateText = objectMapper.convertValue(date?.get("start"), String::class.java)
-        val releaseDateValue =
-            if (releaseDateText != null)
-                LocalDateTime.parse(releaseDateText, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXX"))
-            else LocalDateTime.now()
+            val releaseDate =
+                objectMapper.convertValue(properties["release-date"], object : TypeReference<Map<String, Any>>() {})
+            val date =
+                objectMapper.convertValue(releaseDate["date"], object : TypeReference<Map<String, Any>?>() {})
+            val releaseDateText = objectMapper.convertValue(date?.get("start"), String::class.java)
+            val releaseDateValue =
+                if (releaseDateText != null)
+                    LocalDateTime.parse(releaseDateText, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXX"))
+                else LocalDateTime.now()
 
-        val notionPage = NotionPage(
-            titleString, tagNameList, pageId, categoryName,
-            releaseStateString, releaseDateValue, isAllowComment, parentId
-        )
-        notionPage.content = getPageContent(notionPage)
+            val notionPage = NotionPage(
+                titleString, tagNameList, pageId, categoryName,
+                releaseStateString, releaseDateValue, isAllowComment, parentId
+            )
+            notionPage.content = getPageContent(notionPage)
+
+        } catch (e : Exception) {
+            log.info("-> 노션 데이터베이스 페이지 정보 생성 실패")
+            exitProcess(0)
+        }
 
         val endTime = System.currentTimeMillis()
-        log.info("created complete page info - title : {}", titleString)
-        log.info("elapsed time is : {} second", (endTime - startTime) / 1000)
+
+        log.info("-> 노션 데이터베이스 페이지 정보 생성 성공")
+        log.info("-> 처리 페이지 제목 : {}", titleString)
+        log.info("-> 소요 시간 : {} second", (endTime - startTime) / 1000)
 
         return notionPage
     }
 
     private fun getPageContent(page: NotionPage) : String {
+        log.info("--> \"{}\" 페이지 로딩 시작", page.title)
+
         var urlString = Util.createUrlByPrefixAndSuffix(BASE_URL, BLOCK_URL_PREFIX, BLOCK_URL_SUFFIX, page.pageId)
 
         val pageContent = Document("")
-        pageContent.outputSettings().prettyPrint(false)
 
-        val article = Element("article")
-        article.id("notionArticle")
+        try {
+            pageContent.outputSettings().prettyPrint(false)
 
-        getPageContentRecursive(urlString, null, article)
+            val article = Element("article")
+            article.id("notionArticle")
 
-        pageContent.appendChild(article)
+            getPageContentRecursive(urlString, null, article)
+
+            pageContent.appendChild(article)
+        } catch (e : Exception) {
+            log.info("--> \"{}\" 페이지 로딩 실패", page.title)
+            exitProcess(0)
+        }
+
+        log.info("--> \"{}\" 페이지 로딩 성공", page.title)
 
         return pageContent.html()
     }

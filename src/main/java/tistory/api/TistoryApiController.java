@@ -37,6 +37,7 @@ public class TistoryApiController {
     }
 
     public void writeNewArticle(NotionPage notionPage) {
+        log.info("게시글 등록 로직 시작");
 
         Map<String, String> param = Map.of(
                 "access_token", accessToken,
@@ -57,7 +58,6 @@ public class TistoryApiController {
         HttpsURLConnection connection = null;
 
         try {
-            log.info("티스토리 게시글 등록 로직 시작");
 
             connection = (HttpsURLConnection) new URL(url).openConnection();
             connection.setRequestMethod("POST");
@@ -90,6 +90,7 @@ public class TistoryApiController {
         } catch (Exception e) {
             connection.disconnect();
             log.info("게시글 등록 실패");
+            System.exit(0);
         }
 
     }
@@ -101,6 +102,7 @@ public class TistoryApiController {
     }
 
     public String uploadImageFileAndGetReplacer(@NotNull String imageUrl) {
+        log.info("---> 티스토리 이미지 첨부 로직 시작");
 
         String url = Util.addParametersToUrl(IMAGE_UPLOAD_URL, Map.of(
                 "access_token", accessToken,
@@ -112,7 +114,6 @@ public class TistoryApiController {
         HttpsURLConnection connection = null;
 
         try {
-            log.info("티스토리 이미지 첨부 로직 시작");
 
             String boundary = "^-----^";
             String LINE_FEED = "\r\n";
@@ -157,22 +158,24 @@ public class TistoryApiController {
 
                 if (!response.get("status").equals("200")) return "";
 
-                log.info("이미지 업로드 성공");
+                log.info("---> 티스토리 이미지 업로드 성공");
                 return response.get("replacer").toString();
             } else {
-                log.info("티스토리 이미지 업로드 실패");
+                log.info("---> 티스토리 이미지 업로드 실패");
             }
 
             connection.disconnect();
         } catch (Exception e) {
             connection.disconnect();
-            log.info("티스토리 이미지 업로드 실패");
+            log.info("---> 티스토리 이미지 업로드 실패");
         }
 
         return "";
     }
 
     private void authorizeTistory() {
+
+        log.info("티스토리 인증 절차 시작");
 
         String url = Util.addParametersToUrl(AUTHORIZE_URL,
                 Map.of(
@@ -182,8 +185,6 @@ public class TistoryApiController {
         );
 
         ChromeDriver driver = Util.getChromeDriver();
-
-        log.info("티스토리 인증 시작");
 
         try {
 
@@ -221,6 +222,7 @@ public class TistoryApiController {
             log.info("티스토리 인증 완료");
         } catch (Exception e) {
             log.info("티스토리 인증 실패");
+            System.exit(0);
         } finally {
             driver.quit();
         }
@@ -228,6 +230,8 @@ public class TistoryApiController {
     }
 
     private void getAccessToken() {
+        log.info("티스토리 access_token 획득 시작");
+
         String url = Util.addParametersToUrl(ACCESS_TOKEN_URL,
                 Map.of(
                         "client_id", Util.getTistoryConfigProperty("client_id"),
@@ -239,7 +243,6 @@ public class TistoryApiController {
 
         HttpsURLConnection connection = null;
         try {
-            log.info("티스토리 access_token 획득 시작");
 
             connection = (HttpsURLConnection) new URL(url).openConnection();
             connection.connect();
@@ -264,11 +267,13 @@ public class TistoryApiController {
         } catch (Exception e) {
             connection.disconnect();
             log.info("티스토리 access_token 획득 실패");
+            System.exit(0);
         }
 
     }
 
     private void initCategoryMap() {
+        log.info("티스토리 카테고리 조회 시작");
 
         String url = Util.addParametersToUrl(GET_CATEGORY_URL, Map.of(
                 "access_token", accessToken,
@@ -280,8 +285,6 @@ public class TistoryApiController {
         HttpsURLConnection connection = null;
 
         try {
-            log.info("카테고리 조회 시작");
-
             connection = (HttpsURLConnection) new URL(url).openConnection();
 
             connection.connect();
@@ -299,7 +302,8 @@ public class TistoryApiController {
 
         } catch (Exception e) {
             connection.disconnect();
-            log.info("카테고리 조회 실패");
+            log.info("티스토리 카테고리 조회 실패");
+            System.exit(0);
         }
 
         List<TistoryCategory> categoryList = Util.objectMapper

@@ -23,17 +23,22 @@ public class Util {
 
     public static void initConfig() {
 
+        log.info("설정 파일 로딩 중...");
+
         String filePath = "./config.json";
         File configFile = new File(filePath);
 
         if(configFile.exists()) {
             try {
                 config = objectMapper.readValue(new FileInputStream(configFile), HashMap.class);
+                log.info("설정 파일 로딩 완료");
             } catch (Exception e) {
-                log.info("fail to load config file. check your config file structure");
+                log.info("설정 파일 로딩 실패, 설정 파일을 확인해주세요.");
+                System.exit(0);
             }
         } else {
-            throw new IllegalStateException("config file does not exist");
+            log.info("설정 파일이 존재하지 않습니다.");
+            System.exit(0);
         }
     }
 
