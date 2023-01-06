@@ -5,7 +5,7 @@ import org.jsoup.nodes.Element
 
 class CodeHtmlParser : HtmlParser {
 
-    override fun parse(block: Map<String, Any>): Element? {
+    override fun parse(block: Map<String, Any>, isListChild: Boolean): Element? {
 
         val codeInfo = block["code"] as Map<String, Any>
         val language = codeInfo["language"] as String

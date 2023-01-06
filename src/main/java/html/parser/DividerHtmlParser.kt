@@ -5,7 +5,7 @@ import org.jsoup.nodes.Node
 
 class DividerHtmlParser : HtmlParser {
 
-    override fun parse(block: Map<String, Any>): Node? {
+    override fun parse(block: Map<String, Any>, isListChild: Boolean): Node? {
         return Element("hr")
             .attr("contenteditable", "false")
             .attr("data-ke-type", "horizontalRule")

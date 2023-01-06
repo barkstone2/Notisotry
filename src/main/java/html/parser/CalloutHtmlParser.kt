@@ -10,7 +10,7 @@ class CalloutHtmlParser : HtmlParser, ParentNode() {
      * 콜아웃 icon의 경우 emoji만 지원
      * 아이콘이나 이미지로 처리된 경우 기본 이모지인 전구 이모지로 대체됨 - 💡
      */
-    override fun parse(block: Map<String, Any>): Node? {
+    override fun parse(block: Map<String, Any>, isListChild: Boolean): Node? {
         val calloutInfo = block["callout"] as Map<String, Any>
 
         val icon = calloutInfo["icon"] as Map<String, Any>

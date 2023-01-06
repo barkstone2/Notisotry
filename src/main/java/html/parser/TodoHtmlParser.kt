@@ -5,7 +5,7 @@ import org.jsoup.nodes.Element
 
 class TodoHtmlParser : HtmlParser, ParentNode() {
 
-    override fun parse(block: Map<String, Any>): Element? {
+    override fun parse(block: Map<String, Any>, isListChild: Boolean): Element? {
         val todoInfo = block["to_do"] as Map<String, Any>
 
         val isChecked = todoInfo["checked"] as Boolean

@@ -6,7 +6,7 @@ import org.jsoup.nodes.Node
 
 class TableRowHtmlParser : HtmlParser {
 
-    override fun parse(block: Map<String, Any>): Node {
+    override fun parse(block: Map<String, Any>, isListChild: Boolean): Node {
         val tableRow = block["table_row"] as Map<String, Any>
         val cells = tableRow["cells"] as List<List<Map<String, Any>>>
 

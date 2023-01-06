@@ -6,7 +6,7 @@ import org.jsoup.nodes.Node
 
 class QuoteHtmlParser : HtmlParser {
 
-    override fun parse(block: Map<String, Any>): Node? {
+    override fun parse(block: Map<String, Any>, isListChild: Boolean): Node? {
         val quoteInfo = block["quote"] as Map<String, Any>
         val richTexts = quoteInfo["rich_text"] as List<Map<String, Any>>
 

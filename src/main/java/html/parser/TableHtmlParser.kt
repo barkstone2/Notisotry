@@ -5,7 +5,7 @@ import org.jsoup.nodes.Node
 
 open class TableHtmlParser : HtmlParser, ParentNode() {
 
-    override fun parse(block: Map<String, Any>): Node {
+    override fun parse(block: Map<String, Any>, isListChild: Boolean): Node {
         val table = Element("table")
         table.attr("data-ke-align", "alignLeft")
 

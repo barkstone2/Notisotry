@@ -6,7 +6,7 @@ import org.jsoup.nodes.Node
 
 class ImageHtmlParser : HtmlParser {
 
-    override fun parse(block: Map<String, Any>) : Node? {
+    override fun parse(block: Map<String, Any>, isListChild: Boolean) : Node? {
         val image = block["image"] as Map<String, Any>
 
         val imageType = image["type"] as String

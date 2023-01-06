@@ -5,7 +5,7 @@ import org.jsoup.nodes.Element
 
 class ToggleHtmlParser : HtmlParser, ParentNode() {
 
-    override fun parse(block: Map<String, Any>): Element? {
+    override fun parse(block: Map<String, Any>, isListChild: Boolean): Element? {
         val toggleInfo = block["toggle"] as Map<String, Any>
         val richTexts = toggleInfo["rich_text"] as List<Map<String, Any>>
 

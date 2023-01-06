@@ -6,7 +6,8 @@ import org.jsoup.nodes.TextNode
 
 class ParagraphHtmlParser : HtmlParser {
 
-    override fun parse(block: Map<String, Any>): Element {
+
+    override fun parse(block: Map<String, Any>, isListChild: Boolean): Node {
 
         val paragraph = block["paragraph"] as Map<String, Any>
         val richTexts = paragraph["rich_text"] as List<Map<String, Any>>

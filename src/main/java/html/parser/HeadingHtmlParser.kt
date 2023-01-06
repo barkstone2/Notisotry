@@ -16,7 +16,7 @@ class HeadingHtmlParser : HtmlParser, ParentNode() {
         Pair("h4", "size20"),
     )
 
-    override fun parse(block: Map<String, Any>): Element? {
+    override fun parse(block: Map<String, Any>, isListChild: Boolean): Element? {
         val headingType = block["type"] as String
         val tagName = headingTagMap[headingType]
         val headingInfo = block[headingType] as Map<String, Any>

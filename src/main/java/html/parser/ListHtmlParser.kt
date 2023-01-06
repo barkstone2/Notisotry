@@ -14,7 +14,7 @@ class ListHtmlParser : HtmlParser, ParentNode() {
         Pair("ol", "decimal")
     )
 
-    override fun parse(block: Map<String, Any>): Element? {
+    override fun parse(block: Map<String, Any>, isListChild: Boolean): Element? {
         val listType = block["type"] as String
         val tagName = listTagMap[listType]
         val listInfo = block[listType] as Map<String, Any>
