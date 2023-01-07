@@ -32,6 +32,12 @@ class ParagraphHtmlParser : HtmlParser, ParentNode() {
 
         var p = Element(if(isListChild) "lchild" else "p")
             .addClass("notistory")
+            .attr("style",
+                buildString {
+                    append("margin-top: 0.5em !important; ")
+                    append("margin-bottom: 0.5em !important; ")
+                }
+            )
 
         for (richText in richTexts) {
             val textNodes = createTextNodes(richText)
@@ -121,11 +127,14 @@ class ParagraphHtmlParser : HtmlParser, ParentNode() {
                     tempInnerTag = Element("span")
                         .addClass("code")
                         .attr("style",
-                            "background: rgba(135, 131, 120, 0.15); " +
-                                "color: #eb5757; " +
-                                "padding: 0.2em 0.4em; " +
-                                "border-radius: 3px; " +
-                                "font-size: 85%;")
+                            buildString {
+                                append("background: rgba(135, 131, 120, 0.15); ")
+                                append("color: #eb5757; ")
+                                append("padding: 0.2em 0.4em; ")
+                                append("border-radius: 3px; ")
+                                append("font-size: 85%;")
+                            }
+                        )
                         .appendChild(tempInnerTag)
                 }
                 else -> {

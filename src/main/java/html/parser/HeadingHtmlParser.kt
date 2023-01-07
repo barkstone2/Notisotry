@@ -32,18 +32,17 @@ class HeadingHtmlParser : HtmlParser, ParentNode() {
             .addClass("notistory")
             .addClass(tagName)
             .attr("data-ke-size", headingSizeMap[tagName])
+            .attr("style",
+                buildString {
+                    append("margin-bottom: 0; ")
+                    append("line-height: 1.2; ")
+                    append(headingStyleMap[tagName])
+                }
+            )
 
         for (richText in richTexts) {
             val textNodes = Util.paragraphHtmlParser.createTextNodes(richText)
             headingTag.appendChildren(textNodes)
-        }
-
-        if(isListChild) {
-            headingTag.attr("style",
-                "font-weight: 600; " +
-                    "margin-bottom: 0; " +
-                    "line-height: 1.2; " +
-                    headingStyleMap[tagName])
         }
 
         val isToggleable = headingInfo["is_toggleable"] as Boolean
