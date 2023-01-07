@@ -256,7 +256,7 @@ class NotionApiController {
             if(type.equals(NotionBlockType.NUMBERED_LIST_ITEM)) {
                 parseResult.attr("start", (++listNumber).toString())
             } else {
-                listNumber = 0
+                listNumber = if(Util.isEmptyParagraph(result)) listNumber else 0
             }
             pageContent.appendChild(parseResult)
         }

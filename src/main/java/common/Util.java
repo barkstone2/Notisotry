@@ -3,6 +3,7 @@ package common;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import html.parser.ParagraphHtmlParser;
 import lombok.extern.slf4j.Slf4j;
+import notion.NotionBlockType;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeDriverLogLevel;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -11,6 +12,7 @@ import javax.annotation.Nullable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 
@@ -101,4 +103,13 @@ public class Util {
         return builder.toString();
     }
 
+    public static Boolean isEmptyParagraph(Map<String, Object> block) {
+        NotionBlockType type = NotionBlockType.getByType((String) block.get("type"));
+        if(!type.equals(NotionBlockType.PARAGRAPH)) return false;
+
+        Map<String, Object> paragraph = (Map<String, Object>) block.get("paragraph");
+        List<Map<String, Object>> richTexts = (List<Map<String, Object>>) paragraph.get("rich_text");
+
+        return richTexts.isEmpty();
+    }
 }
