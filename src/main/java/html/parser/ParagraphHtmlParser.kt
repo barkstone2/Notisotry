@@ -4,7 +4,7 @@ import org.jsoup.nodes.Element
 import org.jsoup.nodes.Node
 import org.jsoup.nodes.TextNode
 
-class ParagraphHtmlParser : HtmlParser {
+class ParagraphHtmlParser : HtmlParser, ParentNode() {
 
     private val colorMap = mapOf(
         Pair("red", "color: rgba(212, 76, 71, 1);"),
@@ -44,7 +44,25 @@ class ParagraphHtmlParser : HtmlParser {
 
         p.attr("data-ke-size", "size16")
 
-        return p
+        val hasChildren = block["has_children"] as Boolean
+        var parent = p;
+
+        if(hasChildren) {
+            var childrenDiv = Element("div")
+                .addClass("indented")
+                .attr("style", "padding-left: 1.5em;")
+
+            appendChildIfExist(block, childrenDiv, isListChild)
+
+            parent = Element("indented")
+            parent
+                .appendChild(p)
+                .appendChild(childrenDiv)
+        } else {
+            appendChildIfExist(block, p, isListChild)
+        }
+
+        return parent
     }
 
     fun createTextNodes(textBlock: Map<String, Any>, ignoreAnnotations: Boolean = false): MutableList<Node> {
