@@ -44,7 +44,7 @@ class TodoHtmlParser : HtmlParser, ParentNode() {
 
         todoList.appendChild(todoItem)
 
-        appendChildIfExist(block, todoList)
+        appendChildIfExist(block, todoList, isListChild)
 
         return todoList
     }

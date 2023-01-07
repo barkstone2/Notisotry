@@ -65,7 +65,7 @@ class HeadingHtmlParser : HtmlParser, ParentNode() {
 
             toggleContent.appendChild(headingTag)
 
-            appendChildIfExist(block, toggleContent)
+            appendChildIfExist(block, toggleContent, isListChild)
 
             toggleTag
                 .appendChild(toggleButton)

@@ -46,7 +46,7 @@ class CalloutHtmlParser : HtmlParser, ParentNode() {
             calloutContent.appendChildren(textNodes)
         }
 
-        appendChildIfExist(block, calloutContent)
+        appendChildIfExist(block, calloutContent, isListChild)
 
         calloutWrap.appendChild(calloutIcon)
         calloutWrap.appendChild(calloutContent)

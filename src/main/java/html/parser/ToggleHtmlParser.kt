@@ -29,7 +29,7 @@ class ToggleHtmlParser : HtmlParser, ParentNode() {
             toggleContent.appendChildren(textNodes)
         }
 
-        appendChildIfExist(block, toggleContent)
+        appendChildIfExist(block, toggleContent, isListChild)
 
         toggle
             .appendChild(toggleButton)
