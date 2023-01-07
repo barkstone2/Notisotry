@@ -60,6 +60,7 @@ class ParagraphHtmlParser : HtmlParser {
         for ((index, text) in splitTexts.withIndex()) {
             textNodeList.add(TextNode(text))
             if(index == splitTexts.lastIndex) continue
+            textNodeList.add(TextNode("\n"))
             textNodeList.add(Element("br"))
         }
 
