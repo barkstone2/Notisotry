@@ -11,7 +11,6 @@ import org.asynchttpclient.DefaultAsyncHttpClient
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import org.slf4j.LoggerFactory
-import java.io.File
 import java.net.URL
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -246,9 +245,16 @@ class NotionApiController {
         val hasMore = response["has_more"] as Boolean
         val results = objectMapper.convertValue(response["results"], object:TypeReference<List<Map<String, Any>>>(){})
 
+        var listNumber = 0
         for (result in results) {
-            val htmlParser = htmlParserMapper[NotionBlockType.getByType(result["type"] as String)] ?: continue
-            val parseResult = htmlParser.parse(result) ?: continue
+            val type = NotionBlockType.getByType(result["type"] as String)
+            val htmlParser = htmlParserMapper[type] ?: continue
+            val parseResult = htmlParser.parse(result, isListChild) ?: continue
+            if(type.equals(NotionBlockType.NUMBERED_LIST_ITEM)) {
+                parseResult.attr("start", (++listNumber).toString())
+            } else {
+                listNumber = 0
+            }
             pageContent.appendChild(parseResult)
         }
 
