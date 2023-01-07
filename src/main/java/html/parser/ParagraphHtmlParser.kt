@@ -168,6 +168,7 @@ class ParagraphHtmlParser : HtmlParser, ParentNode() {
         Element("a")
             .addClass("notistory")
             .attr("href", href)
+            .attr("target", "_blank")
     } else null
 
 
