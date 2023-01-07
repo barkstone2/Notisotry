@@ -36,9 +36,9 @@ class ListHtmlParser : HtmlParser, ParentNode() {
 
         for (richText in richTexts) {
             val textNodes = Util.paragraphHtmlParser.createTextNodes(richText)
-            textNodes.add(Element("br"))
             listItemTag.appendChildren(textNodes)
         }
+        listItemTag.appendChild(Element("br"))
 
         appendChildIfExist(block, listItemTag, true)
 
