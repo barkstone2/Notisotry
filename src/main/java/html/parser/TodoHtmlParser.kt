@@ -13,17 +13,21 @@ class TodoHtmlParser : HtmlParser, ParentNode() {
 
         val todoList = Element("ul")
             .addClass("to-do-list")
+            .addClass("notistory")
 
         val todoItem = Element("li")
+            .addClass("notistory")
 
         val checkBox = Element("div")
             .addClass("checkbox")
+            .addClass("notistory")
             .addClass(buildString {
                 append("checkbox-")
                     .append(if (isChecked) "on" else "off")
             })
 
         val todoText = Element("span")
+            .addClass("notistory")
             .addClass(buildString {
                 append("to-do-children-")
                     .append(if (isChecked) "checked" else "unchecked")

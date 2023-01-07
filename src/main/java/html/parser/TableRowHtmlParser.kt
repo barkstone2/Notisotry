@@ -11,9 +11,11 @@ class TableRowHtmlParser : HtmlParser {
         val cells = tableRow["cells"] as List<List<Map<String, Any>>>
 
         val tr = Element("tr")
+            .addClass("notistory")
 
         for (cell in cells) {
             val td = Element("td")
+                .addClass("notistory")
             for (cellText in cell) {
                 val textNodes = Util.paragraphHtmlParser.createTextNodes(cellText)
                 td.appendChildren(textNodes)

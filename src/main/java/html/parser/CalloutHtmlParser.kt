@@ -20,16 +20,26 @@ class CalloutHtmlParser : HtmlParser, ParentNode() {
 
         val calloutWrap = Element("figure")
             .addClass("callout")
+            .addClass("notistory")
+            .attr("style",
+                "background: rgba(135, 131, 120, 0.15); " +
+                        "padding: 1rem; display: " +
+                        "flex; white-space: " +
+                        "pre-wrap; " +
+                        "border-radius: 3px;")
 
         val calloutIcon = Element("div")
+            .addClass("notistory")
 
         val iconTag = Element("span")
             .addClass("icon")
+            .addClass("notistory")
             .append(iconEmoji)
 
         calloutIcon.appendChild(iconTag)
 
         val calloutContent = Element("div")
+            .addClass("notistory")
 
         for (richText in richTexts) {
             val textNodes = Util.paragraphHtmlParser.createTextNodes(richText)

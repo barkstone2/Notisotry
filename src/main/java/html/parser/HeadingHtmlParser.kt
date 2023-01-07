@@ -35,17 +35,18 @@ class HeadingHtmlParser : HtmlParser, ParentNode() {
         var toggleTag : Element? = null
         if(isToggleable) {
             toggleTag = Element("div")
+                .addClass("notistory")
                 .attr("data-ke-type", "moreLess")
                 .attr("data-text-more", "더보기")
                 .attr("data-text-less", "닫기")
 
             val toggleButton = Element("a")
                 .addClass("btn-toggle-moreless")
+                .addClass("notistory")
                 .text("더보기")
 
             val toggleContent = Element("div")
                 .addClass("moreless-content")
-
 
             toggleContent.appendChild(headingTag)
 

@@ -221,13 +221,8 @@ class NotionApiController {
 
         try {
             pageContent.outputSettings().prettyPrint(false)
+            getPageContentRecursive(urlString, null, pageContent)
 
-            val article = Element("article")
-            article.id("notionArticle")
-
-            getPageContentRecursive(urlString, null, article)
-
-            pageContent.appendChild(article)
         } catch (e : Exception) {
             log.info("--> \"{}\" 페이지 로딩 실패", page.title)
             exitProcess(0)

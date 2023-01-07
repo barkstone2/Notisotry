@@ -7,9 +7,14 @@ open class TableHtmlParser : HtmlParser, ParentNode() {
 
     override fun parse(block: Map<String, Any>, isListChild: Boolean): Node {
         val table = Element("table")
-        table.attr("data-ke-align", "alignLeft")
+            .addClass("notistory")
+            .attr("data-ke-align", "alignLeft")
+            .attr("border", "1")
+            .attr("style", "border-collapse: collapse; width: 100%;")
 
         val tbody = Element("tbody")
+            .addClass("notistory")
+
         appendChildIfExist(block, tbody)
         table.appendChild(tbody)
 

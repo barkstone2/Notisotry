@@ -22,7 +22,7 @@ class ListHtmlParser : HtmlParser, ParentNode() {
         val richTexts = listInfo["rich_text"] as List<Map<String, Any>>
 
         var listWrapTag = Element(tagName)
-            .attr("data-ke-list-type", tistoryListTypeMap[tagName])
+            .addClass("notistory")
             .attr("style",
                 buildString {
                     append("list-style-type: ")
@@ -32,6 +32,7 @@ class ListHtmlParser : HtmlParser, ParentNode() {
 
 
         var listItemTag = Element("li")
+            .addClass("notistory")
 
         for (richText in richTexts) {
             val textNodes = Util.paragraphHtmlParser.createTextNodes(richText)

@@ -15,14 +15,20 @@ class CodeHtmlParser : HtmlParser {
         with(codeWrap) {
             addClass(language)
             addClass("hljs")
+            addClass("notistory")
             attr("data-ke-language", language)
             attr("data-ke-type", "codeblock")
         }
 
+        val code = Element("code")
+            .addClass("notistory")
+
         for (richText in richTexts) {
             val textNodes = Util.paragraphHtmlParser.createTextNodes(richText, true)
-            codeWrap.appendChildren(textNodes)
+            code.appendChildren(textNodes)
         }
+
+        codeWrap.appendChild(code)
 
         return codeWrap
     }

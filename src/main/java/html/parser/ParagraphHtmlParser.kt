@@ -6,6 +6,24 @@ import org.jsoup.nodes.TextNode
 
 class ParagraphHtmlParser : HtmlParser {
 
+    private val colorMap = mapOf(
+        Pair("red", "color: rgba(212, 76, 71, 1);"),
+        Pair("pink", "color: rgba(193, 76, 138, 1);"),
+        Pair("purple", "color: rgba(144, 101, 176, 1);"),
+        Pair("blue", "color: rgba(51, 126, 169, 1);"),
+        Pair("green", "color: rgba(68, 131, 97, 1);"),
+        Pair("yellow", "color: rgba(203, 145, 47, 1);"),
+        Pair("orange", "color: rgba(217, 115, 13, 1);"),
+        Pair("brown", "color: rgba(159, 107, 83, 1);"),
+        Pair("gray", "color: rgba(120, 119, 116, 1);"),
+    )
+
+    private val tagNameMap = mapOf(
+        Pair("bold", "b"),
+        Pair("italic", "i"),
+        Pair("strikethrough", "s"),
+        Pair("underline", "u"),
+    )
 
     override fun parse(block: Map<String, Any>, isListChild: Boolean): Node {
 
@@ -30,8 +48,7 @@ class ParagraphHtmlParser : HtmlParser {
         var plainText = textBlock["plain_text"] as String
         val textNodes = linebreakPlaintext(plainText)
 
-        var innerTag = createInnerTag(textBlock, ignoreAnnotations)
-        innerTag?.appendChildren(textNodes)
+        var innerTag = createInnerTag(textBlock, textNodes, ignoreAnnotations)
 
         return innerTag?.let { mutableListOf(it) } ?: textNodes
     }
@@ -49,14 +66,15 @@ class ParagraphHtmlParser : HtmlParser {
         return textNodeList
     }
 
-    private fun createInnerTag(richText: Map<String, Any>, ignoreAnnotations: Boolean) : Element? {
+    private fun createInnerTag(richText: Map<String, Any>, textNodes : List<Node>, ignoreAnnotations: Boolean) : Element? {
         var innerTag = createAnchorTagIfLinkType(richText["href"] as String?)
 
         val (isAnnotatedElement, annotatedAttribute) = isAnnotatedElement(richText)
 
         if(isAnnotatedElement && !ignoreAnnotations) {
             innerTag = innerTag ?: Element("span")
-            setAnnotatedAttribute(innerTag, annotatedAttribute)
+            innerTag.appendChildren(textNodes)
+            innerTag = setAnnotatedAttribute(innerTag, annotatedAttribute)
         }
 
         return innerTag
@@ -65,22 +83,58 @@ class ParagraphHtmlParser : HtmlParser {
     private fun setAnnotatedAttribute(
         innerTag: Element,
         annotatedAttribute: List<Pair<String, Any>>
-    ) {
+    ) : Element {
+
+        var tempInnerTag = innerTag
 
         for ((key, value) in annotatedAttribute) {
             when(key) {
-                "color" -> innerTag.addClass(buildString { append("highlight-").append(value) })
-                else -> innerTag.addClass(key)
+                "color" -> {
+                    tempInnerTag = Element("span")
+                        .addClass(buildString { append("highlight-").append(value) })
+                        .attr("style", getRgb(value as String))
+                        .appendChild(innerTag)
+                }
+                "code" -> {
+                    tempInnerTag = Element("span")
+                        .addClass("code")
+                        .attr("style",
+                            "background: rgba(135, 131, 120, 0.15); " +
+                                "color: #eb5757; " +
+                                "padding: 0.2em 0.4em; " +
+                                "border-radius: 3px; " +
+                                "font-size: 85%;")
+                        .appendChild(tempInnerTag)
+                }
+                else -> {
+                    tempInnerTag = Element(tagNameMap[key])
+                        .appendChild(tempInnerTag)
+                }
             }
         }
+
+        return tempInnerTag.addClass("notistory")
+    }
+
+    private fun getRgb(value: String) : String {
+        val isBackgroundColor = value.contains("background")
+        var key = if(isBackgroundColor) {
+            value.substring(0, value.indexOf("_"))
+        } else {
+            value
+        }
+
+        val rgb = colorMap[key]
+
+        return buildString { append(if(isBackgroundColor) "background-" else "").append(rgb) }
     }
 
     private fun createAnchorTagIfLinkType(
         href: String?
     ): Element? = if(href != null) {
-        val a = Element("a")
-        a.attr("href", href)
-        a
+        Element("a")
+            .addClass("notistory")
+            .attr("href", href)
     } else null
 
 
