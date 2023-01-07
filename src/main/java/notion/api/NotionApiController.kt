@@ -232,7 +232,10 @@ class NotionApiController {
         return pageContent.html()
     }
 
-    private fun getPageContentRecursive(baseUrl: String, parameterMap: Map<String, String>?, pageContent: Element) {
+    private fun getPageContentRecursive(
+        baseUrl: String, parameterMap: Map<String, String>?, pageContent: Element,
+        isListChild: Boolean = false
+    ) {
         val urlString = Util.addParametersToUrl(baseUrl, parameterMap)
         val url = URL(urlString)
         val connection = url.openConnection() as HttpsURLConnection
@@ -263,9 +266,13 @@ class NotionApiController {
         }
     }
 
-    fun appendChildNodesToParent(parentId: String, parentNode: Element) {
+    fun appendChildNodesToParent(
+        parentId: String,
+        parentNode: Element,
+        isListChild: Boolean = false
+    ) {
         var urlString = Util.createUrlByPrefixAndSuffix(BASE_URL, BLOCK_URL_PREFIX, BLOCK_URL_SUFFIX, parentId)
-        getPageContentRecursive(urlString, null, parentNode)
+        getPageContentRecursive(urlString, null, parentNode, isListChild)
     }
 
     fun changeArticleState(notionPage: NotionPage) {
