@@ -15,6 +15,11 @@ class HeadingHtmlParser : HtmlParser, ParentNode() {
         Pair("h3", "size23"),
         Pair("h4", "size20"),
     )
+    private val headingStyleMap = mapOf(
+            Pair("h2", "font-size: 1.875rem; margin-top: 1.875rem;"),
+            Pair("h3", "font-size: 1.5rem; margin-top: 1.5rem;"),
+            Pair("h4", "font-size: 1.25rem; margin-top: 1.25rem;"),
+    )
 
     override fun parse(block: Map<String, Any>, isListChild: Boolean): Element? {
         val headingType = block["type"] as String
@@ -23,12 +28,22 @@ class HeadingHtmlParser : HtmlParser, ParentNode() {
 
         val richTexts = headingInfo["rich_text"] as List<Map<String, Any>>
 
-        var headingTag = Element(tagName)
-        headingTag.attr("data-ke-size", headingSizeMap[tagName])
+        var headingTag = Element(if(isListChild) "div" else tagName)
+            .addClass("notistory")
+            .addClass(tagName)
+            .attr("data-ke-size", headingSizeMap[tagName])
 
         for (richText in richTexts) {
             val textNodes = Util.paragraphHtmlParser.createTextNodes(richText)
             headingTag.appendChildren(textNodes)
+        }
+
+        if(isListChild) {
+            headingTag.attr("style",
+                "font-weight: 600; " +
+                    "margin-bottom: 0; " +
+                    "line-height: 1.2; " +
+                    headingStyleMap[tagName])
         }
 
         val isToggleable = headingInfo["is_toggleable"] as Boolean

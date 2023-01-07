@@ -39,7 +39,7 @@ class ListHtmlParser : HtmlParser, ParentNode() {
             listItemTag.appendChildren(textNodes)
         }
 
-        appendChildIfExist(block, listItemTag)
+        appendChildIfExist(block, listItemTag, true)
 
         listWrapTag.appendChild(listItemTag)
 

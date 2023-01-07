@@ -30,13 +30,16 @@ class ParagraphHtmlParser : HtmlParser {
         val paragraph = block["paragraph"] as Map<String, Any>
         val richTexts = paragraph["rich_text"] as List<Map<String, Any>>
 
-        if(richTexts.isEmpty()) return Element("br")
-
-        var p = Element("p")
+        var p = Element(if(isListChild) "lchild" else "p")
+            .addClass("notistory")
 
         for (richText in richTexts) {
             val textNodes = createTextNodes(richText)
             p.appendChildren(textNodes)
+        }
+
+        if(richTexts.isEmpty() || isListChild) {
+            p.appendChild(Element("br"))
         }
 
         p.attr("data-ke-size", "size16")
