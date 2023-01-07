@@ -103,6 +103,8 @@ class ParagraphHtmlParser : HtmlParser, ParentNode() {
             innerTag = innerTag ?: Element("span")
             innerTag.appendChildren(textNodes)
             innerTag = setAnnotatedAttribute(innerTag, annotatedAttribute)
+        } else {
+            innerTag?.appendChildren(textNodes)
         }
 
         return innerTag
