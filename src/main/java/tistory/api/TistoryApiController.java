@@ -46,7 +46,7 @@ public class TistoryApiController {
                 "title", notionPage.getTitle(),
                 "content", notionPage.getContent(),
                 "visibility", notionPage.getReleaseState(),
-                "category", getCategoryIdByCategoryName(notionPage.getCategory()),
+                "category", getCategoryIdByCategoryLabel(notionPage.getCategory()),
                 "published", notionPage.getReleaseDate(),
                 "tag", notionPage.getTag(),
                 "acceptComment", notionPage.isAllowComment()
@@ -95,10 +95,10 @@ public class TistoryApiController {
 
     }
 
-    public String getCategoryIdByCategoryName(String categoryName) {
+    public String getCategoryIdByCategoryLabel(String categoryLabel) {
         if(categoryMap == null) throw new IllegalStateException("need to reload category");
 
-        return categoryMap.get(categoryName) == null ? "0" : categoryMap.get(categoryName);
+        return categoryMap.get(categoryLabel) == null ? "0" : categoryMap.get(categoryLabel);
     }
 
     public String uploadImageFileAndGetReplacer(@NotNull String imageUrl) {
@@ -311,7 +311,7 @@ public class TistoryApiController {
 
         categoryList
                 .stream()
-                .forEach(category -> categoryMap.put(category.getName(), category.getId()));
+                .forEach(category -> categoryMap.put(category.getLabel(), category.getId()));
     }
 
     private void busyWaitForSelenium(ChromeDriver driver, By locator) throws InterruptedException {
