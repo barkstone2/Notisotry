@@ -37,7 +37,7 @@ private const val AUTHORIZATION_HEADER_KEY = "Authorization"
 class NotionApiController {
     private val log = LoggerFactory.getLogger(javaClass)
     private var databaseId: String? = null
-    private var databaseOptions: HashMap<String, Any> = HashMap()
+    private var databaseOptions: Map<String, Any> = HashMap()
     private val objectMapper = jacksonObjectMapper()
 
     init {
@@ -76,7 +76,7 @@ class NotionApiController {
         )
     }
 
-    fun getNewArticlesForRegister() : List<NotionPage>? {
+    fun getArticlesForNotistory() : List<NotionPage> {
         log.info("노션 데이터베이스 목록 로딩 시작")
 
         val notionPageInfos = mutableListOf<NotionPage>()
@@ -121,7 +121,7 @@ class NotionApiController {
         log.info("-> 노션 데이터베이스 페이지 정보 생성 시작")
         val startTime = System.currentTimeMillis()
         var notionPage: NotionPage
-        var titleString = ""
+        var titleString: String
 
         try {
 
