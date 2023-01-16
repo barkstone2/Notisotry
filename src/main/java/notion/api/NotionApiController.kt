@@ -6,6 +6,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import common.Util
 import html.parser.*
 import notion.NotionBlockType
+import notion.WorkType
 import notion.dto.NotionPage
 import org.asynchttpclient.DefaultAsyncHttpClient
 import org.jsoup.nodes.Document
@@ -65,19 +66,13 @@ class NotionApiController {
         databaseId = Util.getNotionConfigProperty("database_id")
         databaseOptions = objectMapper.readValue(
             "{\n" +
-                "  \"filter\": {\n" +
-                "    \"property\": \"done\",\n" +
-                "    \"checkbox\": {\n" +
-                "      \"equals\": false\n" +
-                "    }\n" +
-                "  },\n" +
-                "  \"sorts\": [\n" +
-                "    {\n" +
-                "      \"property\": \"release-date\",\n" +
-                "      \"direction\": \"ascending\"\n" +
-                "    }\n" +
-                "  ]\n" +
-                "}"
+            "    \"filter\": {\n" +
+            "        \"property\": \"work-type\",\n" +
+            "        \"select\": {\n" +
+            "            \"does_not_equal\": \"완료\" \n" +
+            "        }\n" +
+            "    }" +
+            "}"
         )
     }
 
@@ -132,6 +127,10 @@ class NotionApiController {
 
             val parentId = resultMap["id"] as String
             val properties = objectMapper.convertValue(resultMap["properties"], object : TypeReference<Map<String, Any>>() {})
+
+            val workTypeProperty = objectMapper.convertValue(properties["work-type"], object : TypeReference<Map<String, Any>>() {})
+            val workTypeSelect = objectMapper.convertValue(workTypeProperty["select"], object : TypeReference<Map<String, Any>>() {})
+            val workType = workTypeSelect["name"] as String
 
             val tag = objectMapper.convertValue(properties["tag"], object : TypeReference<Map<String, Any>>() {})
             val tags = objectMapper.convertValue(
@@ -191,11 +190,22 @@ class NotionApiController {
             val releaseDateValue =
                 if (releaseDateText != null)
                     LocalDateTime.parse(releaseDateText, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXX"))
-                else LocalDateTime.now()
+                else null
+
+            val articleIdWrap =
+                objectMapper.convertValue(properties["article-id"], object : TypeReference<Map<String, Any>>() {})
+            val articleId =
+                objectMapper.convertValue(
+                    articleIdWrap["rich_text"], object : TypeReference<MutableList<Map<String, Any>>>() {})
+            val articleIdString = objectMapper.convertValue(
+                if (articleId?.size == 0) "" else articleId[0]["plain_text"],
+                String::class.java
+            )
 
             notionPage = NotionPage(
                 titleString, tagNameList, pageId, categoryName,
-                releaseStateString, releaseDateValue, isAllowComment, parentId
+                releaseStateString, releaseDateValue, isAllowComment, parentId,
+                articleIdString, if(workType == "등록") WorkType.REGISTER else WorkType.UPDATE
             )
             notionPage.content = getPageContent(notionPage)
 
