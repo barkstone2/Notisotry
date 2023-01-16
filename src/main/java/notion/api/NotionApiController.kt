@@ -285,12 +285,20 @@ class NotionApiController {
         getPageContentRecursive(urlString, null, parentNode, isListChild)
     }
 
-    fun changeArticleState(notionPage: NotionPage) {
-        if(!notionPage.isDone) return
+    fun changeDatabaseState(notionPage: NotionPage) {
+        if(!notionPage.isSucceed) return
 
         log.info("노션 데이터베이스 완료 처리 시작")
 
         val urlString = Util.createUrlByPrefixAndSuffix(BASE_URL, PAGE_URL_PREFIX, "", notionPage.parentId)
+
+        val requestBody = mutableMapOf<String, Any>()
+
+        val workType = Pair("work-type", mapOf(Pair("select", mapOf(Pair("name", "완료")))))
+        val articleId = Pair("article-id", mapOf(Pair("rich_text", listOf(mapOf(Pair("text", mapOf(Pair("content", notionPage.articleId))))))))
+        val properties = mapOf(workType, articleId)
+
+        requestBody["properties"] = properties
 
         val client = DefaultAsyncHttpClient()
         client
@@ -298,7 +306,7 @@ class NotionApiController {
             .setHeader(AUTHORIZATION_HEADER_KEY, Util.getNotionConfigProperty("authorization"))
             .setHeader(NOTION_VERSION_HEADER_KEY, NOTION_VERSION_HEADER_VALUE)
             .setHeader("Content-Type", "application/json")
-            .setBody("{\"properties\" : {\"done\" : {\"checkbox\" : true}}}")
+            .setBody(objectMapper.writeValueAsString(requestBody))
             .execute()
             .toCompletableFuture()
             .thenAccept { r ->
