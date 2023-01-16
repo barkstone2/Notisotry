@@ -71,16 +71,16 @@ class ParagraphHtmlParser : HtmlParser, ParentNode() {
         return parent
     }
 
-    fun createTextNodes(textBlock: Map<String, Any>, ignoreAnnotations: Boolean = false): MutableList<Node> {
+    fun createTextNodes(textBlock: Map<String, Any>, ignoreAnnotations: Boolean = false, isCodeBlock: Boolean = false): MutableList<Node> {
         var plainText = textBlock["plain_text"] as String
-        val textNodes = linebreakPlaintext(plainText)
+        val textNodes = linebreakPlaintext(plainText, isCodeBlock)
 
         var innerTag = createInnerTag(textBlock, textNodes, ignoreAnnotations)
 
         return innerTag?.let { mutableListOf(it) } ?: textNodes
     }
 
-    private fun linebreakPlaintext(plainText: String): MutableList<Node> {
+    private fun linebreakPlaintext(plainText: String, isCodeBlock: Boolean = false): MutableList<Node> {
         var textNodeList = mutableListOf<Node>()
         val splitTexts = plainText.split("\n")
 
@@ -88,7 +88,7 @@ class ParagraphHtmlParser : HtmlParser, ParentNode() {
             textNodeList.add(TextNode(text))
             if(index == splitTexts.lastIndex) continue
             textNodeList.add(TextNode("\n"))
-            textNodeList.add(Element("br"))
+            if(!isCodeBlock) textNodeList.add(Element("br"))
         }
 
         return textNodeList
