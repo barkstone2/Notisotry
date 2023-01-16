@@ -1,6 +1,7 @@
 package notion.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import notion.WorkType;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -18,9 +19,11 @@ public class NotionPage {
     private LocalDateTime releaseDate;
     private boolean allowComment = true;
     private String content;
-    private boolean done = false;
+    private WorkType workType;
+    private String articleId;
+    private boolean succeed = false;
 
-    public NotionPage(String title, List<String> tag, String pageId, String category, String releaseState, LocalDateTime releaseDate, boolean allowComment, String parentId) {
+    public NotionPage(String title, List<String> tag, String pageId, String category, String releaseState, LocalDateTime releaseDate, boolean allowComment, String parentId, String articleId, WorkType workType) {
         this.title = title;
         this.tag = tag;
         this.pageId = pageId;
@@ -29,6 +32,8 @@ public class NotionPage {
         this.releaseDate = releaseDate;
         this.allowComment = allowComment;
         this.parentId = parentId;
+        this.articleId = articleId;
+        this.workType = workType;
     }
 
     public NotionPage() {
@@ -107,12 +112,22 @@ public class NotionPage {
         this.content = content;
     }
 
-    public boolean isDone() {
-        return done;
+    public void setWorkType(WorkType workType) {
+        this.workType = workType;
     }
 
-    public void uploadSuccess() {
-        this.done = true;
+    public String getArticleId() {
+        return articleId;
+    }
+
+    public void setArticleId(String articleId) {
+        this.articleId = articleId;
+    }
+
+    public void workSucceed() {this.succeed = true;}
+    public boolean isSucceed() {return succeed;}
+    public boolean isRegisterWork() {
+        return workType != null && workType.equals(WorkType.REGISTER);
     }
 
 }
