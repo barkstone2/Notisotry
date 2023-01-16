@@ -24,7 +24,10 @@ class CodeHtmlParser : HtmlParser {
             .addClass("notistory")
 
         for (richText in richTexts) {
-            val textNodes = Util.paragraphHtmlParser.createTextNodes(richText, true)
+            val textNodes = Util.paragraphHtmlParser.createTextNodes(richText,
+                ignoreAnnotations = true,
+                isCodeBlock = true
+            )
             code.appendChildren(textNodes)
         }
 
