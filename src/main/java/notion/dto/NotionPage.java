@@ -88,7 +88,8 @@ public class NotionPage {
         this.releaseState = releaseState;
     }
 
-    public String getReleaseDate() {
+    public String getTimestamp() {
+        if(releaseDate == null || releaseDate.isBefore(LocalDateTime.now())) return null;
         return String.valueOf(Timestamp.valueOf(releaseDate).getTime());
     }
 
