@@ -36,23 +36,12 @@ public class NotionPage {
         this.workType = workType;
     }
 
-    public NotionPage() {
-    }
-
     public String getParentId() {
         return parentId;
     }
 
-    public void setParentId(String parentId) {
-        this.parentId = parentId;
-    }
-
     public String getTitle() {
         return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
     }
 
     public String getTag() {
@@ -60,32 +49,16 @@ public class NotionPage {
         return String.join(",", tag);
     }
 
-    public void setTag(List<String> tag) {
-        this.tag = tag;
-    }
-
     public String getPageId() {
         return pageId;
-    }
-
-    public void setPageId(String pageId) {
-        this.pageId = pageId;
     }
 
     public String getCategory() {
         return category == null ? "" : category;
     }
 
-    public void setCategory(String category) {
-        this.category = category;
-    }
-
     public String getReleaseState() {
         return releaseState == null || releaseState.equals("비공개") ? "0" : "3";
-    }
-
-    public void setReleaseState(String releaseState) {
-        this.releaseState = releaseState;
     }
 
     public String getTimestamp() {
@@ -93,16 +66,8 @@ public class NotionPage {
         return String.valueOf(Timestamp.valueOf(releaseDate).getTime());
     }
 
-    public void setReleaseDate(LocalDateTime releaseDate) {
-        this.releaseDate = releaseDate;
-    }
-
     public String isAllowComment() {
         return allowComment ? "1" : "0";
-    }
-
-    public void setAllowComment(boolean allowComment) {
-        this.allowComment = allowComment;
     }
 
     public String getContent() {
@@ -111,10 +76,6 @@ public class NotionPage {
 
     public void setContent(String content) {
         this.content = content;
-    }
-
-    public void setWorkType(WorkType workType) {
-        this.workType = workType;
     }
 
     public String getArticleId() {
