@@ -216,7 +216,9 @@ class NotionApiController {
 
         val endTime = System.currentTimeMillis()
 
-        log.info("-> 노션 데이터베이스 페이지 정보 생성 성공\n처리 페이지 제목 : {}\n소요 시간 : {} second", titleString, (endTime - startTime) / 1000)
+        log.info("-> 노션 데이터베이스 페이지 정보 생성 성공\n      " +
+                 "   - 처리 페이지 제목 : {}\n      " +
+                 "   - 소요 시간 : {} second", titleString, (endTime - startTime) / 1000)
 
         return notionPage
     }
