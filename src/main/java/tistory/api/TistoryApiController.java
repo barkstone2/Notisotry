@@ -24,6 +24,7 @@ public class TistoryApiController {
     private static final String GET_CATEGORY_URL = "https://www.tistory.com/apis/category/list";
     private static final String IMAGE_UPLOAD_URL = "https://www.tistory.com/apis/post/attach";
     private static final String ARTICLE_WRITE_URL = "https://www.tistory.com/apis/post/write";
+    private static final String ARTICLE_UPDATE_URL = "https://www.tistory.com/apis/post/modify";
 
     private Map<String, String> categoryMap = new HashMap<>();
 
@@ -36,24 +37,7 @@ public class TistoryApiController {
         initCategoryMap();
     }
 
-    public void writeNewArticle(NotionPage notionPage) {
-        log.info("게시글 등록 로직 시작");
-
-        Map<String, String> param = Map.of(
-                "access_token", accessToken,
-                "output", "json",
-                "blogName", Util.getTistoryConfigProperty("blogName"),
-                "title", notionPage.getTitle(),
-                "content", notionPage.getContent(),
-                "visibility", notionPage.getReleaseState(),
-                "category", getCategoryIdByCategoryLabel(notionPage.getCategory()),
-                "published", notionPage.getReleaseDate(),
-                "tag", notionPage.getTag(),
-                "acceptComment", notionPage.isAllowComment()
-        );
-
-        String url = ARTICLE_WRITE_URL;
-
+    private void postArticle(NotionPage notionPage, Map<String, String> param, String url) {
         Map<String, Object> response;
         HttpsURLConnection connection = null;
 
@@ -75,24 +59,54 @@ public class TistoryApiController {
 
             connection.connect();
 
+            if(connection.getResponseCode() != HttpURLConnection.HTTP_OK) throw new IllegalStateException("");
+
             response = Util.objectMapper.readValue(connection.getInputStream(), Map.class);
+
             connection.disconnect();
 
             response = (Map<String, Object>) response.get("tistory");
 
-            if (!response.get("status").equals("200")) {
-                throw new IllegalStateException("");
-            }
+            notionPage.setArticleId(String.valueOf(response.get("postId")));
+            notionPage.workSucceed();
 
-            notionPage.uploadSuccess();
-
-            log.info("게시글 등록 성공");
+            log.info("게시글 처리 성공");
         } catch (Exception e) {
             connection.disconnect();
-            log.info("게시글 등록 실패");
+            log.info("게시글 처리 실패");
             System.exit(0);
         }
+    }
 
+    public void updateArticle(NotionPage notionPage) {
+        log.info("게시글 수정 로직 시작");
+
+        Map<String, String> param = createRequestParam(notionPage);
+        param.put("postId", notionPage.getArticleId());
+
+        postArticle(notionPage, param, ARTICLE_UPDATE_URL);
+    }
+
+    public void writeNewArticle(NotionPage notionPage) {
+        log.info("게시글 등록 로직 시작");
+
+        postArticle(notionPage, createRequestParam(notionPage), ARTICLE_WRITE_URL);
+    }
+
+    private Map<String, String> createRequestParam(NotionPage notionPage) {
+        Map<String, String> param = new HashMap<>(Map.of(
+                "access_token", accessToken,
+                "output", "json",
+                "blogName", Util.getTistoryConfigProperty("blogName"),
+                "title", notionPage.getTitle(),
+                "content", notionPage.getContent(),
+                "visibility", notionPage.getReleaseState(),
+                "category", getCategoryIdByCategoryLabel(notionPage.getCategory()),
+                "tag", notionPage.getTag(),
+                "acceptComment", notionPage.isAllowComment()
+        ));
+        param.put("published", notionPage.getTimestamp());
+        return param;
     }
 
     public String getCategoryIdByCategoryLabel(String categoryLabel) {
