@@ -32,8 +32,13 @@ public class TistoryApiController {
     private String accessToken;
 
     public TistoryApiController() {
-        authorizeTistory();
-        getAccessToken();
+        String configAccessToken = Util.getTistoryConfigProperty("access_token");
+        if(configAccessToken != null) accessToken = configAccessToken;
+        else {
+            authorizeTistory();
+            getAccessToken();
+        }
+
         initCategoryMap();
     }
 
@@ -275,6 +280,7 @@ public class TistoryApiController {
                 }
                 accessToken = new String(out.toByteArray(), "UTF-8");
                 accessToken = accessToken.substring(accessToken.indexOf("=") + 1);
+                Util.updateConfig(accessToken);
             }
 
             connection.disconnect();

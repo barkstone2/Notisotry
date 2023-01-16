@@ -11,6 +11,7 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import javax.annotation.Nullable;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +43,25 @@ public class Util {
             log.info("설정 파일이 존재하지 않습니다.");
             System.exit(0);
         }
+    }
+
+    public static void updateConfig(String accessToken) {
+        log.info("설정 파일에 ACCESS_TOKEN 저장 중...");
+
+        config.get("tistory").put("access_token", accessToken);
+
+        try {
+            String filePath = "./config.json";
+            File configFile = new File(filePath);
+            FileWriter fileWriter = new FileWriter(configFile);
+            fileWriter.write(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(config));
+            fileWriter.close();
+        } catch (Exception e) {
+           log.info("설정 파일 수정 실패");
+           return;
+        }
+
+        log.info("설정 파일 수정 완료");
     }
 
     private static String getConfigProperty(String directory, String key) {
