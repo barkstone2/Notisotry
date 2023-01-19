@@ -18,7 +18,7 @@ https://barkstone2.tistory.com/136 에서 사용법을 확인할 수 있다.
 ---
 
 ### 3. 다운로드
-https://drive.google.com/file/d/1SQVVRgIVHgBSumBDOQJibDTfTRb7T-nx/view?usp=sharing
+https://barkstone.notion.site/Notistory-97ff2bad22874803913b230daede977d 에서 버전별 다운로드 링크가 제공됩니다.
 
 ---
 
