@@ -26,7 +26,6 @@ class CodeHtmlParser : HtmlParser {
         for (richText in richTexts) {
             val textNodes = Util.paragraphHtmlParser.createTextNodes(richText,
                 ignoreAnnotations = true,
-                isCodeBlock = true
             )
             code.appendChildren(textNodes)
         }
