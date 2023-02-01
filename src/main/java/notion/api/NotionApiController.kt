@@ -177,10 +177,7 @@ class NotionApiController {
             val title =
                 objectMapper.convertValue(
                     titleWrap["title"], object : TypeReference<MutableList<Map<String, Any>>>() {})
-            titleString = objectMapper.convertValue(
-                if (title?.size == 0) "default-title" else title[0]?.get("plain_text") ?: "default-title",
-                String::class.java
-            )
+            titleString = if (title?.size == 0) "default-title" else title.joinToString("") { it["plain_text"] as String }
 
             val releaseDate =
                 objectMapper.convertValue(properties["release-date"], object : TypeReference<Map<String, Any>>() {})
