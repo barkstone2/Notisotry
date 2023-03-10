@@ -188,7 +188,7 @@ class NotionApiController {
             val title =
                 objectMapper.convertValue(
                     titleWrap["title"], object : TypeReference<MutableList<Map<String, Any>>>() {})
-            titleString = if (title?.size == 0) "default-title" else title.joinToString("") { it["plain_text"] as String }
+            titleString = getPageTitle(title, pageId)
 
             val releaseDate =
                 objectMapper.convertValue(properties["release-date"], object : TypeReference<Map<String, Any>>() {})
@@ -213,7 +213,7 @@ class NotionApiController {
             notionPage = NotionPage(
                 titleString, tagNameList, pageId, categoryName,
                 releaseStateString, releaseDateValue, isAllowComment, parentId,
-                articleIdString, if(workType == "등록") WorkType.REGISTER else WorkType.UPDATE
+                articleIdString, if(workType == "등록") WorkType.REGISTER else WorkType.UPDATE,
             )
             notionPage.content = getPageContent(notionPage)
 
@@ -306,7 +306,9 @@ class NotionApiController {
 
         val workType = Pair("work-type", mapOf(Pair("select", mapOf(Pair("name", "완료")))))
         val articleId = Pair("article-id", mapOf(Pair("rich_text", listOf(mapOf(Pair("text", mapOf(Pair("content", notionPage.articleId))))))))
-        val properties = mapOf(workType, articleId)
+        val title = Pair("title", mapOf(Pair("title", listOf(mapOf(Pair("text", mapOf(Pair("content", notionPage.title))))))))
+
+        val properties = mapOf(workType, articleId, title)
 
         requestBody["properties"] = properties
 
@@ -328,6 +330,22 @@ class NotionApiController {
             .join()
 
         client.close()
+    }
+
+    private fun getPageTitle(title: MutableList<Map<String, Any>>, pageId: String?): String {
+        return if (title.size == 0) {
+            val pageUrl = Util.createUrlByPrefixAndSuffix(BASE_URL, BLOCK_URL_PREFIX, "", pageId)
+            val url = URL(pageUrl)
+            val connection = url.openConnection() as HttpsURLConnection
+            connection.setRequestProperty(AUTHORIZATION_HEADER_KEY, Util.getNotionConfigProperty("authorization"))
+            connection.setRequestProperty(NOTION_VERSION_HEADER_KEY, NOTION_VERSION_HEADER_VALUE)
+
+            connection.connect()
+
+            val response = objectMapper.readValue<Map<String, Any>>(connection.inputStream)
+            val results = objectMapper.convertValue(response["child_page"], object:TypeReference<Map<String, String>>(){})
+            results["title"] ?: "default title"
+        } else title.joinToString("") { it["plain_text"] as String }
     }
 
 }
