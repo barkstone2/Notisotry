@@ -71,7 +71,13 @@ class NotionApiController {
             "        \"select\": {\n" +
             "            \"does_not_equal\": \"완료\" \n" +
             "        }\n" +
-            "    }" +
+            "    },\n" +
+            "    \"sorts\" : [\n" +
+            "        {\n" +
+            "            \"property\" : \"생성일\",\n" +
+            "            \"direction\" : \"ascending\"\n" +
+            "        }\n" +
+            "    ]\n" +
             "}"
         )
     }
