@@ -157,6 +157,11 @@ class NotionApiController {
                     } else {
                         temp.substring(temp.lastIndexOf("/") + 1)
                     }
+
+                    temp = if (temp.contains("?")) {
+                        temp.substring(0, temp.lastIndexOf("?"));
+                    } else temp
+
                     temp
                 }
 
