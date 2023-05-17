@@ -1,5 +1,6 @@
 package html.parser
 
+import common.addStyleAttribute
 import org.jsoup.nodes.Element
 import org.jsoup.nodes.Node
 import org.jsoup.nodes.TextNode
@@ -32,7 +33,7 @@ class ParagraphHtmlParser : HtmlParser, ParentNode() {
 
         var p = Element(if(isListChild) "lchild" else "p")
             .addClass("notistory")
-            .attr("style",
+            .addStyleAttribute(
                 buildString {
                     append("margin-top: 0.5em !important; ")
                     append("margin-bottom: 0.5em !important; ")
@@ -122,13 +123,13 @@ class ParagraphHtmlParser : HtmlParser, ParentNode() {
                 "color" -> {
                     tempInnerTag = Element("span")
                         .addClass(buildString { append("highlight-").append(value) })
-                        .attr("style", getRgb(value as String))
-                        .appendChild(innerTag)
+                        .addStyleAttribute(getRgb(value as String))
+                        .appendChild(tempInnerTag)
                 }
                 "code" -> {
                     tempInnerTag = Element("span")
                         .addClass("code")
-                        .attr("style",
+                        .addStyleAttribute(
                             buildString {
                                 append("background: rgba(135, 131, 120, 0.15); ")
                                 append("color: #eb5757; ")
