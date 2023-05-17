@@ -18,7 +18,7 @@ https://barkstone2.tistory.com/136 에서 사용법을 확인할 수 있다.
 ---
 
 ### 3. 다운로드
-https://barkstone.notion.site/Notistory-97ff2bad22874803913b230daede977d 에서 버전별 다운로드가 가능하다.
+깃허브 저장소 release 탭에서 버전별 다운로드가 가능하다.
 
 ---
 
