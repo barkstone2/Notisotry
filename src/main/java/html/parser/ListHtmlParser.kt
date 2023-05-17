@@ -61,10 +61,7 @@ class ListHtmlParser : HtmlParser, ParentNode() {
             .addClass("notistory")
             .attr("style", listItemStyleMap[tagName])
 
-        for (richText in richTexts) {
-            val textNodes = Util.paragraphHtmlParser.createTextNodes(richText)
-            listItemTag.appendChildren(textNodes)
-        }
+        Util.paragraphHtmlParser.appendTextNodesToParent(richTexts, listItemTag)
         listItemTag.appendChild(Element("br"))
 
         appendChildIfExist(block, listItemTag, true)

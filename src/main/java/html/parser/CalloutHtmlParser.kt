@@ -61,10 +61,7 @@ class CalloutHtmlParser : HtmlParser, ParentNode() {
                 }
             )
 
-        for (richText in richTexts) {
-            val textNodes = Util.paragraphHtmlParser.createTextNodes(richText)
-            calloutContent.appendChildren(textNodes)
-        }
+        Util.paragraphHtmlParser.appendTextNodesToParent(richTexts, calloutContent)
 
         appendChildIfExist(block, calloutContent, isListChild)
 

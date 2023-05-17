@@ -15,10 +15,7 @@ class QuoteHtmlParser : HtmlParser {
             .addClass("blockquote")
             .attr("data-ke-style", "style2")
 
-        for (richText in richTexts) {
-            val textNodes = Util.paragraphHtmlParser.createTextNodes(richText)
-            blockquote.appendChildren(textNodes)
-        }
+        Util.paragraphHtmlParser.appendTextNodesToParent(richTexts, blockquote)
 
         if(isListChild) {
             blockquote.attr("style", "margin-top: 10px; " +

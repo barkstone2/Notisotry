@@ -16,10 +16,7 @@ class TableRowHtmlParser : HtmlParser {
         for (cell in cells) {
             val td = Element("td")
                 .addClass("notistory")
-            for (cellText in cell) {
-                val textNodes = Util.paragraphHtmlParser.createTextNodes(cellText)
-                td.appendChildren(textNodes)
-            }
+            Util.paragraphHtmlParser.appendTextNodesToParent(cell, td)
             if(!td.hasText()) td.html("&nbsp;")
             tr.appendChild(td)
         }

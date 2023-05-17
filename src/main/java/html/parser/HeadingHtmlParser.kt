@@ -40,10 +40,7 @@ class HeadingHtmlParser : HtmlParser, ParentNode() {
                 }
             )
 
-        for (richText in richTexts) {
-            val textNodes = Util.paragraphHtmlParser.createTextNodes(richText)
-            headingTag.appendChildren(textNodes)
-        }
+        Util.paragraphHtmlParser.appendTextNodesToParent(richTexts, headingTag)
 
         val isToggleable = headingInfo["is_toggleable"] as Boolean
         var toggleTag : Element? = null
