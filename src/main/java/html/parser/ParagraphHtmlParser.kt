@@ -31,7 +31,7 @@ class ParagraphHtmlParser : HtmlParser, ParentNode() {
         val paragraph = block["paragraph"] as Map<String, Any>
         val richTexts = paragraph["rich_text"] as List<Map<String, Any>>
 
-        var p = Element(if(isListChild) "lchild" else "p")
+        val p = Element(if(isListChild) "lchild" else "p")
             .addClass("notistory")
             .addStyleAttribute(
                 buildString {
@@ -40,10 +40,7 @@ class ParagraphHtmlParser : HtmlParser, ParentNode() {
                 }
             )
 
-        for (richText in richTexts) {
-            val textNodes = createTextNodes(richText)
-            p.appendChildren(textNodes)
-        }
+        appendTextNodesToParent(richTexts, p)
 
         if(richTexts.isEmpty() || isListChild) {
             p.appendChild(Element("br"))
@@ -55,7 +52,7 @@ class ParagraphHtmlParser : HtmlParser, ParentNode() {
         var parent = p;
 
         if(hasChildren) {
-            var childrenDiv = Element("div")
+            val childrenDiv = Element("div")
                 .addClass("indented")
                 .attr("style", "padding-left: 1.5em;")
 
@@ -72,17 +69,62 @@ class ParagraphHtmlParser : HtmlParser, ParentNode() {
         return parent
     }
 
+    fun appendTextNodesToParent(richTexts: List<Map<String, Any>>, parent: Element, ignoreAnnotations: Boolean = false, isCodeBlock: Boolean = false) {
+        var anchorList = mutableListOf<Node>()
+
+        var processHref: String? = null
+        for (richText in richTexts) {
+
+            val href = richText["href"] as String?
+            val textNodes = createTextNodes(richText, ignoreAnnotations, isCodeBlock)
+
+            // 현재 노드가 링크가 아닌 경우 부모 태그에 삽입 후 continue
+            if(href == null) {
+                // 처리 중이던 링크가 있는 경우 해당 앵커 노드 먼저 처리
+                if(processHref != null) {
+                    appendAnchorToParent(processHref, parent, anchorList)
+
+                    processHref = null
+                    anchorList = mutableListOf()
+                }
+
+                parent.appendChildren(textNodes)
+                continue
+            }
+
+            // 현재 노드가 링크고 처리중이던 링크가 없는 경우 초기값 세팅 후 continue
+            if(processHref == null) {
+                anchorList.addAll(textNodes)
+                processHref = href
+                continue
+            }
+
+            // 현재 링크와 처리중인 링크가 같은 경우 리스트에 값만 추가
+            if(href == processHref) {
+                anchorList.addAll(textNodes)
+                continue
+            }
+
+            // 처리중이던 링크와 다른 새로운 링크를 처리하는 경우
+            appendAnchorToParent(processHref, parent, anchorList)
+
+            processHref = href
+            anchorList = mutableListOf()
+            anchorList.addAll(textNodes)
+        }
+    }
+
     fun createTextNodes(textBlock: Map<String, Any>, ignoreAnnotations: Boolean = false, isCodeBlock: Boolean = false): MutableList<Node> {
-        var plainText = textBlock["plain_text"] as String
+        val plainText = textBlock["plain_text"] as String
         val textNodes = linebreakPlaintext(plainText, isCodeBlock)
 
-        var innerTag = createInnerTag(textBlock, textNodes, ignoreAnnotations)
+        val innerTag = createInnerTag(textBlock, textNodes, ignoreAnnotations)
 
-        return innerTag?.let { mutableListOf(it) } ?: textNodes
+        return mutableListOf(innerTag)
     }
 
     private fun linebreakPlaintext(plainText: String, isCodeBlock: Boolean = false): MutableList<Node> {
-        var textNodeList = mutableListOf<Node>()
+        val textNodeList = mutableListOf<Node>()
         val splitTexts = plainText.split("\n")
 
         for ((index, text) in splitTexts.withIndex()) {
@@ -95,17 +137,16 @@ class ParagraphHtmlParser : HtmlParser, ParentNode() {
         return textNodeList
     }
 
-    private fun createInnerTag(richText: Map<String, Any>, textNodes : List<Node>, ignoreAnnotations: Boolean) : Element? {
-        var innerTag = createAnchorTagIfLinkType(richText["href"] as String?)
+    private fun createInnerTag(richText: Map<String, Any>, textNodes : List<Node>, ignoreAnnotations: Boolean) : Element {
+        var innerTag = Element("span")
 
         val (isAnnotatedElement, annotatedAttribute) = isAnnotatedElement(richText)
 
         if(isAnnotatedElement && !ignoreAnnotations) {
-            innerTag = innerTag ?: Element("span")
             innerTag.appendChildren(textNodes)
             innerTag = setAnnotatedAttribute(innerTag, annotatedAttribute)
         } else {
-            innerTag?.appendChildren(textNodes)
+            innerTag.appendChildren(textNodes)
         }
 
         return innerTag
@@ -184,6 +225,16 @@ class ParagraphHtmlParser : HtmlParser, ParentNode() {
         }
 
         return Pair(annotatedAttributeList.isNotEmpty(), annotatedAttributeList)
+    }
+
+    private fun appendAnchorToParent(processHref: String, parent: Element, anchorList: MutableList<Node>) {
+        val anchor = Element("a")
+            .addClass("notistory")
+            .attr("href", processHref)
+            .attr("target", "_blank")
+
+        anchor.appendChildren(anchorList)
+        parent.appendChild(anchor)
     }
 
 }
