@@ -112,6 +112,10 @@ class ParagraphHtmlParser : HtmlParser, ParentNode() {
             anchorList = mutableListOf()
             anchorList.addAll(textNodes)
         }
+
+        if(processHref != null) {
+            appendAnchorToParent(processHref, parent, anchorList)
+        }
     }
 
     fun createTextNodes(textBlock: Map<String, Any>, ignoreAnnotations: Boolean = false, isCodeBlock: Boolean = false): MutableList<Node> {
